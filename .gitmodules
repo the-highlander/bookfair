@@ -1,0 +1,3 @@
+[submodule "public/extjs"]
+	path = public/extjs
+	url = git://github.com/the-highlander/extjs.git
