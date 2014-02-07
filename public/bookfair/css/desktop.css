@@ -1,0 +1,189 @@
+/* 
+    Document   : desktop
+    Created on : 19/04/2013, 7:04:09 PM
+    Author     : Russell
+    Description:
+        Purpose of the stylesheet follows.
+*/
+
+/*----------------------------------------------------
+    Start Button
+*/
+
+.ux-start-button .x-btn-arrow {
+    background-image: none;
+}
+
+.ux-taskbar {
+    padding-left: 4px !important;
+}
+
+/*----------------------------------------------------
+    Start Menu
+*/
+
+.ux-start-menu-toolbar .x-btn-inner {
+    text-align: left;
+}
+
+.ux-start-menu-toolbar {
+    padding: 4px !important;
+}
+
+/*----------------------------------------------------
+    TaskBar
+*/
+
+/* Use high specificity selector to override default styling*/
+div.ux-taskbar div.x-toolbar {
+    background: transparent none;
+    border: 0 none;
+    padding: 0;
+}
+
+.ux-desktop-windowbar .x-btn-inner,
+.x-nbr .ux-desktop-windowbar .x-btn-icon-text-left button {
+    text-align: left !important;
+}
+
+/*----------------------------------------------------
+    Tray Clock
+*/
+.ux-desktop-trayclock {
+    text-align: center;
+    vertical-align: middle;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+/*----------------------------------------------------
+    Desktop DataView
+*/
+.ux-wallpaper {
+    background-color: #3d71b8;
+}
+
+.ux-wallpaper-tiled {
+    background-repeat: repeat;
+}
+
+.ux-desktop-shortcut {
+    cursor: pointer;
+    text-align: center;
+    padding: 8px;
+    margin: 8px;
+    width: 64px;
+}
+
+.ux-desktop-shortcut-icon {
+    width: 48px;
+    height: 48px;
+    background-color: transparent;
+    background-repeat: no-repeat;
+}
+
+.ux-desktop-shortcut-text {
+    font: normal 10px tahoma,arial,verdana,sans-serif;
+    text-decoration: none;
+    padding-top: 5px;
+    color: white;
+}
+
+.x-view-over .ux-desktop-shortcut-text {
+    text-decoration: underline;
+}
+
+/*----------------------------------------------------
+    Icon classes for desktop shortcuts and task bars
+*/
+.icon-add {
+    background-image: url(../img/add.gif) !important;
+}
+
+.icon-edit {
+    background-image: url(../img/gears16x16.png) !important;
+}
+
+.icon-remove {
+    background-image: url(../img/delete.png) !important;
+}
+
+.user-mgmt-shortcut {
+    background-image: url(../img/users48x48.png);
+}
+
+.user-mgmt-icon {
+    background-image: url(../img/users16x16.png) !important;
+}
+
+.x-ie6 .user-mgmt-shortcut {
+    background-image: none;
+    filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='img/users48x48.png', sizingMethod='scale');
+}
+
+
+.settings-icon {
+    background-image: url(../img/gears16x16.png) !important;
+}
+
+
+.bookfair-shortcut {
+    background-image: url(../img/bookfairs48x48.png) !important;
+}
+
+.bookfair-icon {
+    background-image: url(../img/bookfairs16x16.png) !important;
+}
+
+.x-ie6 .bookfair-shortcut {
+    background-image: none;
+    filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='img/bookfairs48x48.png', sizingMethod='scale');
+}
+
+.section-shortcut {
+    background-image: url(../img/sections48x48.png) !important;
+}
+
+.section-icon {
+    background-image: url(../img/sections16x16.png) !important;
+}
+
+.x-ie6 .section-shortcut {
+    background-image: none;
+    filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='img/sections48x48.png', sizingMethod='scale');
+}
+
+.category-shortcut {
+    background-image: url(../img/categories48x48.png) !important;
+}
+
+.category-icon {
+    background-image: url(../img/categories16x16.png) !important;
+}
+
+.x-ie6 .category-shortcut {
+    background-image: none;
+    filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='img/categories48x48.png', sizingMethod='scale');
+}
+
+
+.stats-shortcut {
+    background-image: url(../img/stats48x48.png) !important;
+}
+
+.stats-icon {
+    background-image: url(../img/stats16x16.png) !important;
+}
+
+.x-ie6 .stats-shortcut {
+    background-image: none;
+    filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='img/stats48x48.png', sizingMethod='scale');
+}
+
+/*-----------------------------------
+    Icon classes for Row Action items
+*/
+.ux-actioncolumn-delete-icon {
+    background-image: url(../img/taskbar/delete.png) !important;
+    background-color: transparent;
+}

@@ -1,1 +1,20 @@
-* text=auto
+# These files are text and should be normalized (convert crlf =&gt; lf)
+*.cfg        text
+*.css        text
+*.htc        text
+*.html       text
+*.js         text
+*.jsb3       text
+*.json       text
+*.md         text
+*.php        text
+*.properties text
+*.txt        text
+*.xml        text
+
+# Images should be treated as binary
+# (binary is a macro for -text -diff)
+*.ico     binary
+*.png     binary
+*.gif     binary
+*.swf     binary
