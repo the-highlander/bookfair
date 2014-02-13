@@ -140,7 +140,28 @@ Ext.define('Warehouse.view.bookfair.List', {
                     width: 60,
                     hidden: true,
                     sortable: false
-                }, 
+                }, {
+                    header: 'Attendance',
+                    dataIndex: 'attendance',
+                    xtype: 'numbercolumn',
+                    format: '0,000',
+                    align: 'right',
+                    flex: 1
+                }, {
+                    header: 'Boxes',
+                    dataIndex: 'stock',
+                    xtype: 'numbercolumn',
+                    format: '0,000',
+                    align: 'right',
+                    flex: 1
+                },{
+                    header: 'Sold',
+                    dataIndex: 'sold',
+                    xtype: 'numbercolumn',
+                    format: '0%',
+                    align: 'right',
+                    flex: 1
+                },
                 //TODO: Implement locked -- no changes permitted if locked.
                 {
                     xtype: 'actioncolumn',
@@ -304,6 +325,7 @@ Ext.define('Warehouse.view.bookfair.List', {
     },
 
     onSelectionChange: function (sm, recs, event) {
+console.log(recs[0]);        
         if (recs.length == 1) {    
             Ext.getCmp('btnEditBookfair').enable();
             Ext.getCmp('btnPacking').enable();

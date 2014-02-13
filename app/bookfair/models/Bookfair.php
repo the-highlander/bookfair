@@ -108,12 +108,6 @@ class Bookfair extends Eloquent  {
             ->orderBy('day');
     }
 
-    public function totalAttendance () {
-        return $this
-            ->hasMany('Bookfair\Attendance')
-            ->select('bookfair_id', DB::Raw('sum(attendance) as attendance'));
-    }
-
     public function allocations() {
         return $this->hasMany('Bookfair\Allocation')
             ->select(array('label', 'name', 'packed', 'allocation_ratio', 'tables_allocated'));
@@ -161,11 +155,6 @@ class Bookfair extends Eloquent  {
             ->orderBy(DB::raw('pallets.name, sections.name, minlabel'));            
     }
 
-    public function totalStock() {
-        return $this->hasMany('Bookfair\Statistic')
-            ->select('bookfair_id', DB::raw('sum(total_stock) as stock'));
-    }
-
     public function salesSummary() {
         //TODO: Need to adjust figures for box size differences -- standardise to A3 boxes.
         return $this
@@ -182,7 +171,7 @@ class Bookfair extends Eloquent  {
                 DB::raw('SUM(total_sold) AS total_sold'),
                 DB::raw('SUM(total_unsold) AS total_unsold')
             ))
-            ->groupBy(DB::raw('(SELECT section_id FROM categories WHERE id = category_id)'));
+            ->groupBy(DB::raw('bookfair_id, (SELECT section_id FROM categories WHERE id = category_id)'));
     }            
 
     public function salesTotals() {
@@ -198,7 +187,8 @@ class Bookfair extends Eloquent  {
                 DB::raw('SUM(total_stock) AS total_stock'),
                 DB::raw('SUM(total_sold) AS total_sold'),
                 DB::raw('SUM(total_unsold) AS total_unsold')
-            ));
+            ))
+            ->groupBy('bookfair_id');
     }            
 
     public function soldRankedBySection() {
@@ -229,11 +219,37 @@ class Bookfair extends Eloquent  {
                                     'GROUP BY rw3.section_id) rw1', array($this->id));   
     }
 
+    // Individual Column Totals   
+    public function totalAttendance () {
+        return $this
+            ->hasMany('Bookfair\Attendance')
+            ->select('bookfair_id', DB::Raw('sum(attendance) as value'))
+            ->groupBy('bookfair_id');
+    }
+    
+    public function totalSold () {
+        return $this
+            ->hasMany('Bookfair\Sale')
+            ->select('bookfair_id', DB::Raw('sum(total_sold) as boxes'))
+            ->groupBy('bookfair_id')->first();
+    }
 
+    public function totalPercentSold () {
+        return $this
+            ->hasMany('Bookfair\Sale')
+            ->select('bookfair_id', DB::Raw('sum(total_sold)/sum(total_stock) as percent'))
+            ->groupBy('bookfair_id');
+    }
+
+    public function totalStock() {
+        return $this->hasMany('Bookfair\Sale')
+            ->select('bookfair_id', DB::raw('sum(total_stock) as boxes'))
+            ->groupBy('bookfair_id');
+    }
+    
     //TODO::UPTOHERE  How to get a list of categories by section for a bookfair  bookfair: {.... Sectoins: [{    Categories: [{}...]} 
     function categorySummary () {
         //TODO: Need to adjust figures for box size differences -- standardise to A3 boxes
-
     }
     /*
     -- Query 1 Category Summary

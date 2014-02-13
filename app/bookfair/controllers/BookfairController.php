@@ -75,7 +75,7 @@ class BookfairController extends BaseController {
 
     public function index() {
         // No special privileges for reading bookfairs
-        return Bookfair::all();
+        return Bookfair::with('salesTotals', 'totalAttendance')->get();
     }
 
     public function show($id) {
