@@ -10,8 +10,7 @@ class Sale extends Statistic {
         'packed',
         'target',
         'tablegroup_id', 
-        'suggested', 
-        'allocated'
+        'suggested'
     );
 
     /**
