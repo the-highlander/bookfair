@@ -88,6 +88,7 @@ class CreateAllTables extends Migration {
             $table->integer('pallet_id')->unsigned()->nullable();
             $table->integer('tablegroup_id')->unsigned()->nullable(); // foreign key to table_groups
             $table->string('measure')->default('table');
+            $table->integer('pallet_loading')->default('56'); 
             $table->foreign('section_id')->references('id')->on('sections')->onDelete('cascade');
         });
     }

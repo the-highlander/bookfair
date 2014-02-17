@@ -12,19 +12,15 @@ class CategoryController extends BaseController {
         if (Auth::user()->can('Create Categories')) {
             //TODO:: need to redevelop. allocate and track are now seasonal in separate table
             try {
-                $pallet = Pallet::find(Input::get('pallet_id'));
                 $section = Section::find(Input::get('section_id'));
                 $tablegroup = TableGroup::find(Input::get('table_group_id'));
                 $category = new Category(array(
                     'name'            => Input::get('name'),
                     'label'           => Input::get('label'),
-                    'loading'         => Input::get('loading'),
                     'measure'         => Input::get('measure'),
+                    'pallet_loading'  => Input::get('pallet_loading'),
                     'allocate'        => Input::get('allocate'),
-                    'track'           => Input::get('track'),
-                    'spring'          => Input::get('spring'),
-                    'autumn'          => Input::get('autumn'),
-                    'winter'          => Input::get('winter'),
+                    'track'           => Input::get('track')
                 ));
                 $category->tableGroup()->associate($tablegroup);                
                 $category->pallet()->associate($pallet);
@@ -68,7 +64,7 @@ class CategoryController extends BaseController {
 
     public function index() {
         // No special privileges for reading categories
-        return Category::with('section')->with('settings')->with('settings.pallet')->with('settings.tablegroup')->get();
+        return Category::with('section')->get();
     }
 
     public function show($id) {
