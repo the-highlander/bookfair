@@ -44,6 +44,10 @@ class User extends Eloquent implements UserInterface, RemindableInterface {
         return $this->email;
     }
 
+    public function name() {
+       return $this->person()->first()->fullname();       
+    }
+    
     public static function validate($data) {
         return Validator::make($data, static::$rules);
     }
@@ -66,8 +70,7 @@ class User extends Eloquent implements UserInterface, RemindableInterface {
         return $this->belongsToMany('Bookfair\Privilege');
     }
     
-    public function can($name) {
-        
+    public function can($name) {        
         $granted = $this->privileges()->where('name', '=', $name);
         return !is_null($granted); 
     }

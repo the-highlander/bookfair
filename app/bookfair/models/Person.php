@@ -15,12 +15,16 @@ class Person extends Eloquent  {
         return $this->hasOne('Bookfair\User');
     }
     
+    public function fullname() {
+        return $this->first_name . ' ' . $this->last_name;
+    }
+    
     //public function emergency_person() {
     //    return $this->has_one('EmergencyContact', 'id');
    // }
     
     public function access_card() {
-    	return $this->hasany('AccessCard', 'issued_to_person_id'); //TODO: Check is that the right value for column reference.
+    	return $this->hasMany('AccessCard', 'issued_to_person_id'); //TODO: Check is that the right value for column reference.
     }
 }
 

@@ -42,7 +42,7 @@ class PersonController extends BaseController {
         if (Auth::user()->allowed_to('Create People')) {
             $input = Input::json();
             $person = Person::create($input);
-            return Response::make($person->toJson());
+            return $person;
         } else {
             return Response::make(json_encode(array(
                 'success' => false, 
