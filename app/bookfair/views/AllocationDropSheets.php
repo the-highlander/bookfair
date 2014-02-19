@@ -1,17 +1,21 @@
 <?php
+
 //TODO: Required by March 2014
+
 namespace Bookfair;
+
 use TCPDF;
 use DateTime;
 use URL;
 
 /*
-    Produces the control sheets used when unpacking pallets at the book fair to show how many boxes 
-    in each category will go on top of the table and how many go underneath. 
-*/
+  Produces the control sheets used when unpacking pallets at the book fair to show how many boxes
+  in each category will go on top of the table and how many go underneath.
+ */
+
 class AllocationDropSheets extends TCPDF {
 
-    private $_orientation = 'p'; 
+    private $_orientation = 'p';
     private $_units = 'mm';
     private $_pagesize = 'A4';
     private $_lineStyle;
@@ -29,4 +33,5 @@ class AllocationDropSheets extends TCPDF {
     }
 
 }
+
 ?>
