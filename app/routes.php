@@ -21,62 +21,7 @@ Route::get('logout', function() {
     return Redirect::to('login');
 });
 
-Route::get('test', function()
-{
-    //$data = Bookfair\Category::with('section')->with('statistics')->with('statistics.pallet')->with('statistics.tablegroup')->get();
-$bookfair = Bookfair\Bookfair::whereYear(2013)->whereSeason('Spring')->pluck('id');
-        return $bookfair;
-        $thisBookfair = 63;
-        $priorBookfair = Bookfair\Bookfair::with('categories')->whereSeason('Spring')->whereYear(2013)->get();
-        $cats = array_map(
-            function($cat) use ($thisBookfair, $priorBookfair) {
-               $loading = ($cat["pivot"]["allocate"]) ? Bookfair\Statistic::whereCategoryId($cat["id"])->avg('loading') : 0;
-                return array(
-                    'bookfair_id' => $thisBookfair,
-                    'category_id' => $cat["id"],
-                    'section_id' => $cat["section_id"],
-                    'label'    => $cat["label"], 
-                    'name' => $cat["name"],
-                    'tablegroup_id' => $cat["pivot"]["tablegroup_id"],
-                    'allocate' => ($cat["pivot"]["track"]) ? $cat["pivot"]["allocate"] : 0,
-                    'track' => $cat["pivot"]["track"],
-                    'measure' => $cat["pivot"]["measure"],
-                    'loading' => is_null($loading) ? 0 : $loading,
-                    'target' => $cat["pivot"]["target"]
-                );
-            }, $priorBookfair[0]->categories->toArray());   
-        return $cats;   
-
-
-    return $data;
-        $bookfair = Bookfair\Bookfair::with('palletassignments')->find(12);
-        $pallets = array();
-        foreach($bookfair->palletassignments as $assignment) {
-            $pallets[$assignment->pallet_id][] = $assignment;
-        }
-        return $pallets;
-    //$data = Bookfair\Pallet::with('assignments')->orderBy('name')->get();
-    return $data;
-    return DB::getQueryLog();
-    // $data = Bookfair\Allocation::forTablegroup(12, 27)->where('id', '<>', 796)->sum('boxes_packed');
-    //$data = Bookfair\Bookfair::with('allocations.tablegroup')->with('allocations.category.section')->find(12);
-    //return DB::getQueryLog();
-    //        $data = Bookfair\Category::ForSeason('spring')->with(array('settings' => function ($query) { $query->where('season', '=', 'spring'); }))->with('settings.pallet')->with('settings.tablegroup')->get();
-       return $data;
-        $thisBookfair = Bookfair\Bookfair::find(63);
-        $priorBookfair = Bookfair\Bookfair::whereSeason($thisBookfair->season)->whereYear($thisBookfair->year - 1)->pluck('id');
-        return gettype($dt->start_date);
-    $start = 1000; $finish = 1700;
-    $day = new DateTime('2014-03-01');
-        for ($i = $start; $i <= $finish; $i+=100) {
-            $reqtimes[] = array(
-                'day'         => $day,
-                'start_hr'    => $i,
-                'end_hr'      => $i + 100
-            );
-        }
-
-
+Route::get('test', function() {
     return DB::getQueryLog();
 });
 
@@ -110,20 +55,22 @@ Route::delete('people/{id}', array('before'=>'auth', 'uses'=>'Bookfair\PersonCon
 
 Route::get('statistics/bookfair/{bookfair}/allocations', array('before'=>'auth', 'uses'=>'Bookfair\StatisticController@allocations'));
 Route::put('statistics/bookfair/{bookfair}/allocations/{id}', array('before'=>'auth', 'uses'=>'Bookfair\StatisticController@updateallocation'));
-
 Route::get('statistics/bookfair/{bookfair}/sales', array('before'=>'auth', 'uses'=>'Bookfair\StatisticController@sales'));
 Route::put('statistics/bookfair/{bookfair}/sales/{id}', array('before'=>'auth', 'uses'=>'Bookfair\StatisticController@updatesales'));
-
 Route::get('statistics/bookfair/{bookfair}/targets', array('before'=>'auth', 'uses'=>'Bookfair\StatisticController@targets'));
 Route::put('statistics/bookfair/{bookfair}/targets/{id}', array('before'=>'auth', 'uses'=>'Bookfair\StatisticController@updatetargets'));
 Route::delete('statistics/bookfair/{bookfair}/targets/{id}', array('before'=>'auth', 'uses'=>'Bookfair\StatisticController@destroy'));
 
-Route::get('forms/statistics/capture/bookfair/{bookfair}', array('before'=>'auth', 'uses'=>'Bookfair\FormsController@tallysheets'));
-Route::get('forms/statistics/capture/bookfair/{bookfair}/division/{division}', array('before'=>'auth', 'uses'=>'Bookfair\FormsController@tallysheets'));
+Route::get('forms/bookfair/{bookfair}/sales/tallysheet', array('before'=>'auth', 'uses'=>'Bookfair\FormsController@salestallysheets'));
+Route::get('forms/bookfair/{bookfair}/division/{division}/sales/tallysheet', array('before'=>'auth', 'uses'=>'Bookfair\FormsController@salestallysheets'));
 Route::get('forms/statistics/bookfair/{bookfair}/attendance', array('before'=>'auth', 'uses'=>'Bookfair\FormsController@attendance'));
 Route::get('forms/statistics/bookfair/{bookfair}/summary', array('before'=>'auth', 'uses'=>'Bookfair\FormsController@summary'));
 Route::get('forms/statistics/bookfair/{bookfair}/details', array('before'=>'auth', 'uses'=>'Bookfair\FormsController@details'));
+
 Route::get('forms/bookfair/{bookfair}/pallet/assignments', array('uses'=>'Bookfair\FormsController@palletassignments'));
+Route::get('forms/bookfair/{bookfair}/pallet/packingsheets', array('uses'=>'Bookfair\FormsController@packingsheets'));
+Route::get('forms/bookfair/{bookfair}/pallet/tallysheets', array('uses'=>'Bookfair\FormsController@pallettally'));
+Route::get('forms/bookfair/{bookfair}/allocation/boxdrops', array('uses'=>'Bookfair\FormsController@boxdrops'));
 
 Route::get('sections', array('before'=>'auth', 'uses'=>'Bookfair\SectionController@index'));
 Route::post('sections/0', array('before'=>'auth', 'uses'=>'Bookfair\SectionController@create'));

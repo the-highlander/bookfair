@@ -10,36 +10,6 @@ class Bookfair extends Eloquent  {
     protected $guarded = array('id');
     public $timestamps = false;
 
-    public function loadTimeslots ($day, $start, $finish) {
-        // Delete attendance records for the specified day of this bookfair that fall outside the new opening hours
-        $this->hourlyAttendance()
-            ->whereDay($day)
-            ->where(function ($query) use ($start, $finish) {
-                $query->where('start_hr', '<', $start)
-                    ->orWhere('start_hr', '>', $finish);
-            })
-            ->delete();
-        // Compute the new set of timing blocks
-        for ($i = $start; $i <= $finish; $i+=100) {
-            $reqtimes[] = array(
-                'bookfair_id' => $this->id,
-                'day'         => $day,
-                'start_hr'    => $i,
-                'end_hr'      => $i + 100
-            );
-        }
-        // Compare what's needed for the new opening hours and what's already in the table and add any missing timeslots
-        $curtimes = $this->hourlyAttendance()->whereDay($day)->get();
-        if (count($curtimes) == 0) {
-            $new = $reqtimes;
-        } else {
-            $new = array_diff($reqtimes, $curtimes);
-        }
-        if (count($new) > 0 ) {
-            $this->attendances()->insert($new);
-        }
-    }    
-
     public function addAttendance() {
         $this->loadTimeslots($this->start_date, $this->fri_open, $this->fri_close);
         $this->loadTimeslots($this->start_date->add(new DateInterval('P1D')), $this->sat_open, $this->sat_close);
@@ -70,6 +40,11 @@ class Bookfair extends Eloquent  {
     }
     */
 
+    public function allocations() {
+        return $this->hasMany('Bookfair\Allocation')
+            ->select(array('label', 'name', 'packed', 'allocation_ratio', 'tables_allocated'));
+    }
+
     public function attachPriorCatgories () {
         $thisBookfair = $this->id;
         $priorBookfair = Bookfair::with('categories')->whereSeason($this->season)->whereYear($this->year - 1)->get();
@@ -93,11 +68,14 @@ class Bookfair extends Eloquent  {
         $this->categories()->attach($cats);   
     }     
 
-    public function hourlyAttendance () {
+    public function attendances() {
+        return $this->hasMany('Bookfair\Attendance');
+    }
+
+    public function categories() {
         return $this
-            ->hasMany('Bookfair\Attendance')
-            ->select('bookfair_id', DB::Raw('dayname(day) as day'), 'start_hr', 'end_hr', 'attendance')
-            ->orderBy('day')->orderBy('start_hr');
+            ->belongsToMany('Bookfair\Category', 'statistics', 'bookfair_id', 'category_id')
+            ->withPivot('allocate', 'track', 'measure', 'tablegroup_id', 'pallet_id', 'target');
     }
 
     public function dailyAttendance () {
@@ -108,32 +86,43 @@ class Bookfair extends Eloquent  {
             ->orderBy('day');
     }
 
-    public function allocations() {
-        return $this->hasMany('Bookfair\Allocation')
-            ->select(array('label', 'name', 'packed', 'allocation_ratio', 'tables_allocated'));
-    }
-
-    public function attendances() {
-        return $this->hasMany('Bookfair\Attendance');
-    }
-
-    public function sales() {
-        return $this->hasMany('Bookfair\Sale');
-    }
-
-    public function categories() {
+    public function hourlyAttendance () {
         return $this
-            ->belongsToMany('Bookfair\Category', 'statistics', 'bookfair_id', 'category_id')
-            ->withPivot('allocate', 'track', 'measure', 'tablegroup_id', 'pallet_id', 'target');
+            ->hasMany('Bookfair\Attendance')
+            ->select('bookfair_id', DB::Raw('dayname(day) as day'), 'start_hr', 'end_hr', 'attendance')
+            ->orderBy('day')->orderBy('start_hr');
     }
 
-    public function sections() {
-        return $this
-            ->belongsToMany('Bookfair\Section', 'statistics', 'bookfair_id', 'section_id')
-            ->groupBy('section_id')
-            ->orderBy('division_id')->orderBy('sections.name');
-    }
-    
+    public function loadTimeslots ($day, $start, $finish) {
+        // Delete attendance records for the specified day of this bookfair that fall outside the new opening hours
+        $this->hourlyAttendance()
+            ->whereDay($day)
+            ->where(function ($query) use ($start, $finish) {
+                $query->where('start_hr', '<', $start)
+                    ->orWhere('start_hr', '>', $finish);
+            })
+            ->delete();
+        // Compute the new set of timing blocks
+        for ($i = $start; $i <= $finish; $i+=100) {
+            $reqtimes[] = array(
+                'bookfair_id' => $this->id,
+                'day'         => $day,
+                'start_hr'    => $i,
+                'end_hr'      => $i + 100
+            );
+        }
+        // Compare what's needed for the new opening hours and what's already in the table and add any missing timeslots
+        $curtimes = $this->hourlyAttendance()->whereDay($day)->get();
+        if (count($curtimes) == 0) {
+            $new = $reqtimes;
+        } else {
+            $new = array_diff($reqtimes, $curtimes);
+        }
+        if (count($new) > 0 ) {
+            $this->attendances()->insert($new);
+        }
+    }    
+
     public function palletassignments() {
         return $this
             ->hasMany('Bookfair\Statistic')
@@ -155,14 +144,18 @@ class Bookfair extends Eloquent  {
             ->orderBy(DB::raw('pallets.name, sections.name, minlabel'));            
     }
 
+    public function sales() {
+        return $this->hasMany('Bookfair\Sale');
+    }
+
     public function salesSummary() {
         //TODO: Need to adjust figures for box size differences -- standardise to A3 boxes.
         return $this
             ->hasMany('Bookfair\Statistic')
             ->select(array(
-                'bookfair_id',
-                DB::raw('(SELECT section_id FROM categories WHERE id = category_id) as section_id'),
-                DB::raw('(SELECT (SELECT name FROM sections WHERE id = section_id) FROM categories WHERE id = category_id) as section_name'),
+                'bookfair_id', 'section_id', 
+                //DB::raw('(SELECT section_id FROM categories WHERE id = category_id) as section_id'),
+                DB::raw('(SELECT name FROM sections WHERE id = section_id) as section_name'),
                 DB::raw('SUM(fri_sold) AS fri_sold'),
                 DB::raw('SUM(sat_sold) AS sat_sold'),
                 DB::raw('SUM(sun_sold) AS sun_sold'),
@@ -191,18 +184,11 @@ class Bookfair extends Eloquent  {
             ->groupBy('bookfair_id');
     }            
 
-    public function soldRankedBySection() {
-        return $this->hasMany('Bookfair\Statistic')
-            ->select(DB::raw('DISTINCT bookfair_id, sum(total_sold) AS tots'))
-            ->groupBy(DB::raw('(SELECT section_id FROM categories WHERE id = statistics.category_id)'))
-            ->orderby('tots', 'desc');
-    }
-
-    public function unsoldRankedBySection() {
-        return $this->hasMany('Bookfair\Statistic')
-            ->select(DB::raw('DISTINCT bookfair_id, sum(total_unsold) AS tots'))
-            ->groupBy(DB::raw('(SELECT section_id FROM categories WHERE id = statistics.category_id)'))
-            ->orderby('tots', 'desc');
+    public function sections() {
+        return $this
+            ->belongsToMany('Bookfair\Section', 'statistics', 'bookfair_id', 'section_id')
+            ->groupBy('section_id')
+            ->orderBy('division_id')->orderBy('sections.name');
     }
     
     public function soldGroupConcatBySection() {
@@ -212,11 +198,15 @@ class Bookfair extends Eloquent  {
                                     'GROUP BY rw3.section_id) rw1', array($this->id));
     }
 
-    public function unsoldGroupConcatBySection() {
-        return DB::select('SELECT GROUP_CONCAT(DISTINCT rw1.total_values ORDER BY rw1.total_values DESC) AS ranked_values FROM ' .
-                              '(SELECT DISTINCT SUM(rw2.total_unsold) AS total_values FROM statistics rw2, categories rw3 ' .
-                                    'WHERE rw2.bookfair_id = ? AND rw3.id = rw2.category_id ' .
-                                    'GROUP BY rw3.section_id) rw1', array($this->id));   
+    public function soldRankedBySection() {
+        return $this->hasMany('Bookfair\Statistic')
+            ->select(DB::raw('DISTINCT bookfair_id, sum(total_sold) AS tots'))
+            ->groupBy(DB::raw('(SELECT section_id FROM categories WHERE id = statistics.category_id)'))
+            ->orderby('tots', 'desc');
+    }
+
+    public function targets() {
+        return $this->hasMany('Bookfair\Target')->orderBy('pallet_id')->orderBy('section_id');
     }
 
     // Individual Column Totals   
@@ -227,13 +217,6 @@ class Bookfair extends Eloquent  {
             ->groupBy('bookfair_id');
     }
     
-    public function totalSold () {
-        return $this
-            ->hasMany('Bookfair\Sale')
-            ->select('bookfair_id', DB::Raw('sum(total_sold) as boxes'))
-            ->groupBy('bookfair_id')->first();
-    }
-
     public function totalPercentSold () {
         return $this
             ->hasMany('Bookfair\Sale')
@@ -241,10 +224,31 @@ class Bookfair extends Eloquent  {
             ->groupBy('bookfair_id');
     }
 
+    public function totalSold () {
+        return $this
+            ->hasMany('Bookfair\Sale')
+            ->select('bookfair_id', DB::Raw('sum(total_sold) as sold'))
+            ->groupBy('bookfair_id')->first();
+    }
+
     public function totalStock() {
         return $this->hasMany('Bookfair\Sale')
-            ->select('bookfair_id', DB::raw('sum(total_stock) as boxes'))
+            ->select('bookfair_id', DB::raw('sum(total_stock) as stock'))
             ->groupBy('bookfair_id');
+    }
+    
+    public function unsoldGroupConcatBySection() {
+        return DB::select('SELECT GROUP_CONCAT(DISTINCT rw1.total_values ORDER BY rw1.total_values DESC) AS ranked_values FROM ' .
+                              '(SELECT DISTINCT SUM(rw2.total_unsold) AS total_values FROM statistics rw2, categories rw3 ' .
+                                    'WHERE rw2.bookfair_id = ? AND rw3.id = rw2.category_id ' .
+                                    'GROUP BY rw3.section_id) rw1', array($this->id));   
+    }
+
+    public function unsoldRankedBySection() {
+        return $this->hasMany('Bookfair\Statistic')
+            ->select(DB::raw('DISTINCT bookfair_id, sum(total_unsold) AS tots'))
+            ->groupBy(DB::raw('(SELECT section_id FROM categories WHERE id = statistics.category_id)'))
+            ->orderby('tots', 'desc');
     }
     
     //TODO::UPTOHERE  How to get a list of categories by section for a bookfair  bookfair: {.... Sectoins: [{    Categories: [{}...]} 

@@ -1,21 +1,19 @@
-Ext.define('Warehouse.view.bookfair.List', { 
-
+Ext.define('Warehouse.view.bookfair.List', {
     extend: 'Ext.grid.Panel',
-    alias : 'widget.bookfairlist',
+    alias: 'widget.bookfairlist',
     require: [
-        'Warehouse.view.Print', 
+        'Warehouse.view.Print',
         'Warehouse.view.PrintTabs',
         'Ext.grid.plugin.RowEditing'
     ],
-
-    initComponent: function () {
+    initComponent: function() {
         var me = this;
         Ext.apply(me, {
             loadMask: true,
             store: Ext.create('Warehouse.store.Bookfairs',
-                {
-                    storeId: 'bookfairStore'
-                }),
+                    {
+                        storeId: 'bookfairStore'
+                    }),
             tbar: [
                 {
                     text: 'Add Bookfair',
@@ -40,7 +38,7 @@ Ext.define('Warehouse.view.bookfair.List', {
                                 text: 'Edit Targets',
                                 id: 'mnuEditTargets',
                                 iconCls: 'edit',
-                                handler: me.onPackingTargets                               
+                                handler: me.onPackingTargets
                             }, {
                                 text: 'Print Pallet Assignments',
                                 id: 'mnuPrintPalletAssignments',
@@ -60,7 +58,7 @@ Ext.define('Warehouse.view.bookfair.List', {
                         ]
                     }
 
-                },'-', {
+                }, '-', {
                     text: 'Allocations',
                     id: 'btnAllocations',
                     tooltip: 'Table Allocations',
@@ -154,7 +152,7 @@ Ext.define('Warehouse.view.bookfair.List', {
                     format: '0,000',
                     align: 'right',
                     flex: 1
-                },{
+                }, {
                     header: 'Sold',
                     dataIndex: 'sold',
                     xtype: 'numbercolumn',
@@ -169,10 +167,10 @@ Ext.define('Warehouse.view.bookfair.List', {
                     sortable: false,
                     menuDisabled: false,
                     items: [{
-                        icon: '/bookfair/img/delete.png',
-                        tooltip: 'Delete Bookfair',
-                        handler: me.onDeleteBookfair
-                    }]
+                            icon: '/bookfair/img/delete.png',
+                            tooltip: 'Delete Bookfair',
+                            handler: me.onDeleteBookfair
+                        }]
                 }
             ],
             listeners: {
@@ -186,19 +184,18 @@ Ext.define('Warehouse.view.bookfair.List', {
         });
         me.callParent();
     },
-
-    onAddBookfair: function () {
+    onAddBookfair: function() {
         var grid = this.up('bookfairlist'),
-            store = grid.getStore(),
-            month = ["03","03","03","06","06","06","09","09","09","03","03","03"],
-            season = ["Autumn","Autumn","Autumn","Spring","Spring","Spring","Winter","Winter","Winter","Autumn","Autumn","Autumn"],
-            venue = ["Exhibition Park","Exhibition Park","Exhibition Park","Exhibition Park","Exhibition Park","Exhibition Park","Vikings Club","Vikings Club","Vikings Club","Exhibition Park","Exhibition Park","Exhibition Park"],
-            d = new Date(Ext.Date.now()),
-            y = d.getFullYear() + (d.getMonth() > 8 ? 1 : 0),
-            open9am = '9:00 AM',
-            close6pm = '6:00 PM',
-            start = Ext.Date.parse(y + "-" + month[d.getMonth()] + "-15", "Y-m-d"),
-            row;
+                store = grid.getStore(),
+                month = ["03", "03", "03", "06", "06", "06", "09", "09", "09", "03", "03", "03"],
+                season = ["Autumn", "Autumn", "Autumn", "Spring", "Spring", "Spring", "Winter", "Winter", "Winter", "Autumn", "Autumn", "Autumn"],
+                venue = ["Exhibition Park", "Exhibition Park", "Exhibition Park", "Exhibition Park", "Exhibition Park", "Exhibition Park", "Vikings Club", "Vikings Club", "Vikings Club", "Exhibition Park", "Exhibition Park", "Exhibition Park"],
+                d = new Date(Ext.Date.now()),
+                y = d.getFullYear() + (d.getMonth() > 8 ? 1 : 0),
+                open9am = '9:00 AM',
+                close6pm = '6:00 PM',
+                start = Ext.Date.parse(y + "-" + month[d.getMonth()] + "-15", "Y-m-d"),
+                row;
         while (start.getDay() !== 5) {
             start = Ext.Date.add(start, Ext.Date.DAY, 1);
         }
@@ -223,22 +220,20 @@ Ext.define('Warehouse.view.bookfair.List', {
         view = Ext.widget('bookfairedit');
         view.down('form').getForm().loadRecord(row);
     },
-
-    onEditBookfair: function () {
+    onEditBookfair: function() {
         var sm = this.up('bookfairlist').getSelectionModel();
         if (sm.hasSelection()) {
             var row = sm.getSelection()[0],
-                view = Ext.widget('bookfairedit');
+                    view = Ext.widget('bookfairedit');
             view.down('form').getForm().loadRecord(row);
         } else {
             Ext.Msg.alert('No Bookfair Selected', 'Please select a bookfair from the list and try again.');
         }
     },
-
-    onAllocateTables: function () {
+    onAllocateTables: function() {
         var grid = grid = this.up('bookfairlist'),
-            sm = grid.getSelectionModel(),
-            bookfair, me, module, win;
+                sm = grid.getSelectionModel(),
+                bookfair, me, module, win;
         if (sm.hasSelection()) {
             bookfair = sm.getSelection()[0];
             module = myDesktop.getModule('allocations-win');
@@ -249,18 +244,17 @@ Ext.define('Warehouse.view.bookfair.List', {
             }
         }
     },
-
-    onDeleteBookfair: function (grid, rowIndex) {
+    onDeleteBookfair: function(grid, rowIndex) {
         var store = grid.getStore(),
-            record = grid.getStore().getAt(rowIndex);
+                record = grid.getStore().getAt(rowIndex);
         Ext.Msg.show({
             title: 'Warning',
             icon: Ext.Msg.WARNING,
             msg: Ext.String.format("You are about to delete the <b>{0} {1}</b> Bookfair. Any data associated with this Bookfair " +
-                "will also be removed, including stock allocations, planning data and sales statistics. This operation cannot be undone. <br><br>" +
-                "Delete the {0} {1} Bookfair?", record.get('season'), record.get('year')),
+                    "will also be removed, including stock allocations, planning data and sales statistics. This operation cannot be undone. <br><br>" +
+                    "Delete the {0} {1} Bookfair?", record.get('season'), record.get('year')),
             buttons: Ext.MessageBox.OKCANCEL,
-            fn: function (button) {
+            fn: function(button) {
                 if (button === 'ok') {
                     store.removeAt(rowIndex);
                     store.sync();
@@ -269,11 +263,10 @@ Ext.define('Warehouse.view.bookfair.List', {
             scope: this
         });
     },
-
-    onPackingTargets: function () {
+    onPackingTargets: function() {
         var grid = grid = this.up('bookfairlist'),
-            sm = grid.getSelectionModel(),
-            bookfair, me, module, win;
+                sm = grid.getSelectionModel(),
+                bookfair, me, module, win;
         if (sm.hasSelection()) {
             bookfair = sm.getSelection()[0];
             module = myDesktop.getModule('targets-win');
@@ -284,49 +277,47 @@ Ext.define('Warehouse.view.bookfair.List', {
             }
         }
     },
-
-    onPrintPackingSheets: function () {
+    onPrintPackingSheets: function() {
+        // Wall charts for tracking boxes packed onto each pallet
         var grid = grid = this.up('bookfairlist'),
-            sm = grid.getSelectionModel(),
-            bookfair, win;
+                sm = grid.getSelectionModel(),
+                bookfair, win;
         if (sm.hasSelection()) {
             bookfair = sm.getSelection()[0];
-            win = Ext.create('Warehouse.view.Print', { 
+            win = Ext.create('Warehouse.view.Print', {
                 title: Ext.String.format("Packing Sheets for {0} {1}", bookfair.get('season'), bookfair.get('year')),
-                url: 'forms/bookfair/' + bookfair.get('id') + '/packingsheets'
+                url: 'forms/bookfair/' + bookfair.get('id') + '/pallet/packingsheets'
             });
         }
     },
-
-    onPrintPalletAssignments: function () {
+    onPrintPalletAssignments: function() {
+        // Print Pallet Description, ie what categories go on what pallet for this bookfair
         var grid = grid = this.up('bookfairlist'),
-            sm = grid.getSelectionModel(),
-            bookfair, win;
+                sm = grid.getSelectionModel(),
+                bookfair, win;
         if (sm.hasSelection()) {
             bookfair = sm.getSelection()[0];
-            win = Ext.create('Warehouse.view.Print', { 
+            win = Ext.create('Warehouse.view.Print', {
                 title: Ext.String.format("Pallet Assignments for {0} {1}", bookfair.get('season'), bookfair.get('year')),
                 url: 'forms/bookfair/' + bookfair.get('id') + '/pallet/assignments'
             });
         }
     },
-
-    onPrintPalletTally: function () {
+    onPrintPalletTally: function() {
+        // Print Pallet Tally Sheets, ie count of pallets packed
         var grid = grid = this.up('bookfairlist'),
-            sm = grid.getSelectionModel(),
-            bookfair, win;
+                sm = grid.getSelectionModel(),
+                bookfair, win;
         if (sm.hasSelection()) {
             bookfair = sm.getSelection()[0];
-            win = Ext.create('Warehouse.view.Print', { 
+            win = Ext.create('Warehouse.view.Print', {
                 title: Ext.String.format("Pallet Tallysheets for  {0} {1}", bookfair.get('season'), bookfair.get('year')),
-                url: 'forms/bookfair/' + bookfair.get('id') + '/pallet/tallysheet'
+                url: 'forms/bookfair/' + bookfair.get('id') + '/pallet/tallysheets'
             });
         }
     },
-
-    onSelectionChange: function (sm, recs, event) {
-console.log(recs[0]);        
-        if (recs.length == 1) {    
+    onSelectionChange: function(sm, recs, event) {
+        if (recs.length == 1) {
             Ext.getCmp('btnEditBookfair').enable();
             Ext.getCmp('btnPacking').enable();
             Ext.getCmp('btnAllocations').enable();
@@ -337,38 +328,45 @@ console.log(recs[0]);
             Ext.getCmp('btnAllocations').disable();
             Ext.getCmp('btnSales').disable();
         }
-   },
-
-   onCellDoubleClick: function (table, td, cellIndex, record, tr, rowIndex, e, eOpts) {
-        var view = Ext.widget('bookfairedit');
-        view.down('form').getForm().loadRecord(record);
-   },
-
-    onPrintAllocations: function () {
     },
-
-    onPrintSaleTallySheet: function () {
+    onCellDoubleClick: function(table, td, cellIndex, record, tr, rowIndex, e, eOpts) {
+        var view = Ext.widget('bookfairedit');
+        console.log(record);
+        view.down('form').getForm().loadRecord(record);
+    },
+    onPrintAllocations: function() {
         var grid = grid = this.up('bookfairlist'),
-            sm = grid.getSelectionModel(),
-            bookfair, win;
+                sm = grid.getSelectionModel(),
+                bookfair, win;
         if (sm.hasSelection()) {
             bookfair = sm.getSelection()[0];
-            win = Ext.create('Warehouse.view.Print', { 
+            //win = Ext.create('Warehouse.view.PrintTabs', {
+            //    title: Ext.String.format("Table Allocation Drop Sheets for {0} {1}", bookfair.get('season'), bookfair.get('year')),
+            //    url: 'forms/bookfair/' + bookfair.get('id') + '/allocation/boxdrop
+            //});
+        }
+    },
+    onPrintSaleTallySheet: function() {
+        var grid = grid = this.up('bookfairlist'),
+                sm = grid.getSelectionModel(),
+                bookfair, win;
+        if (sm.hasSelection()) {
+            bookfair = sm.getSelection()[0];
+            win = Ext.create('Warehouse.view.Print', {
                 title: Ext.String.format("Sales Tally Sheet for {0} {1}", bookfair.get('season'), bookfair.get('year')),
-                url: 'forms/statistics/capture/bookfair/' + bookfair.get('id')
+                url: 'forms/bookfair/' + bookfair.get('id') + '/sales/tallysheet'
             });
         }
     },
-
-    onPrintSalesReports: function () {
+    onPrintSalesReports: function() {
         var grid = grid = this.up('bookfairlist'),
-            sm = grid.getSelectionModel(),
-            bookfair, win;
+                sm = grid.getSelectionModel(),
+                bookfair, win;
         if (sm.hasSelection()) {
             bookfair = sm.getSelection()[0];
-            win = Ext.create('Warehouse.view.PrintTabs', { 
+            win = Ext.create('Warehouse.view.PrintTabs', {
                 title: Ext.String.format("Sales Reports for {0} {1}", bookfair.get('season'), bookfair.get('year')),
-                tabs: [{ 
+                tabs: [{
                         title: 'Attendance',
                         url: 'forms/statistics/bookfair/' + bookfair.get('id') + '/attendance'
                     }, {
@@ -382,11 +380,10 @@ console.log(recs[0]);
             });
         }
     },
-
-    onEnterSalesData: function () {
+    onEnterSalesData: function() {
         var grid = grid = this.up('bookfairlist'),
-            sm = grid.getSelectionModel(),
-            bookfair, me, module, win;
+                sm = grid.getSelectionModel(),
+                bookfair, me, module, win;
         if (sm.hasSelection()) {
             bookfair = sm.getSelection()[0];
             module = myDesktop.getModule('sales-win');

@@ -1,9 +1,10 @@
 <?php
 
-//TODO: Required by March 2014
+//TODO: Per BookfaRequired by March 2014
 
 namespace Bookfair;
 
+use Auth;
 use TCPDF;
 use DateTime;
 use URL;
@@ -27,10 +28,9 @@ class PalletTallySheet extends TCPDF {
         // Always generate this report using A4 Portrait measured in millimeters.
         parent::__construct($this->_orientation, $this->_units, $this->_pagesize, true, 'UTF-8', false);
         $this->SetCreator(PDF_CREATOR);
-//$pdf->SetAuthor('Nicola Asuni');
-//$pdf->SetTitle('TCPDF Example 011');
-//$pdf->SetSubject('TCPDF Tutorial');
-//$pdf->SetKeywords('TCPDF, PDF, example, test, guide');
+        $this->SetAuthor(Auth::user()->name());
+        $this->SetTitle('Pallet Tally Sheet');
+        $this->SetSubject('Warehouse Stock Control');
         $this->SetHeaderMargin(PDF_MARGIN_HEADER);
         $this->SetFooterMargin(PDF_MARGIN_FOOTER);
         $this->_fair = & $bookfair;

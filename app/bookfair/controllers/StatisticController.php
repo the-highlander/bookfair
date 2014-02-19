@@ -112,7 +112,9 @@ class StatisticController extends BaseController {
                 $target->allocate = Input::get('allocate');
                 $target->track = Input::get('track');
                 $target->save();
-
+                $pallet = Pallet::find(Input::get('pallet'));
+                $target->pallet()->associate($pallet);
+                $target->associate($pallet);
             } catch (Exception $e) {
                 //TODO: Pretty up the exception emssage.
                 return Response::json(array(

@@ -7,6 +7,10 @@ use Response;
 use DB;
 
 class FormsController extends BaseController {   
+    
+    private function filename ($bookfair, $name) {
+        return $bookfair->year . '_' . $bookfair->season . '_' . $name . '.pdf';
+    }
 
     public function attendance($bookfair_id) {
         $bookfair = Bookfair::find($bookfair_id);
@@ -16,7 +20,7 @@ class FormsController extends BaseController {
             ->where('year', '<=', $bookfair->year)
             ->select('id', 'year', 'season', 'start_date')
             ->orderBy('year', 'desc')->get();
-        $filename = $bookfair->season . $bookfair->year . "_attendance.pdf";
+        $filename = $this->filename($bookfair, 'attendance');
         $pdf = new AttendanceReport($bookfair, $attendance);
         return Response::make($pdf->Output($filename, 'S'), 200, array('Content-Type'=>'application/pdf'));
     }
@@ -35,24 +39,32 @@ class FormsController extends BaseController {
             $i++;
         }
         //return $bookfair;
-        $filename = $bookfair->season . $bookfair->year . "_saledetail.pdf";
+        $filename = $this->filename($bookfair, 'saledetail');
         $pdf = new SalesDetail($bookfair); 
         return Response::make($pdf->Output($filename, 'S'), 200, array('Content-Type'=>'application/pdf'));
     }
 
 
-    public function tableallocations($bookfair_id) {
+    public function allocationdropsheets($bookfair_id) {
         //TODO: Need to get this working before March 2014
         $bookfair = Bookfair::with('allocations')->find($bookfair_id);
         // sheet needs to show boxes on table max(boxes_packed, (allocation_ratio * tables_allocated))
         // and boxes under table min(0, (boxes_packed - (allocation_ratio * tables_allocated)))
         if (!is_null($allocations)) {           
-            $filename = $bookfair->season . $bookfair->year . "_dropsheets.pdf";
+            $filename = $this->filename($bookfair, 'dropsheets');
             $pdf = new AllocationDropSheets($bookfair, $allocations);            
             return Response::make($pdf->Output($filename, 'S'), 200, array('Content-Type'=>'application/pdf'));
         }
     }
 
+    public function packingsheets($bookfair_id) {
+        //TODO: Get the target data        
+        $bookfair = Bookfair::with('targets', 'targets.section')->find($bookfair_id);
+        $filename = $this->filename($bookfair, 'packingsheets');
+        $pdf = new PalletPackingSheet($bookfair);
+        return Response::make($pdf->Output($filename, 'S'), 200, array('Content-Type'=>'application/pdf'));    
+    }
+    
     public function palletassignments($bookfair_id) {
         $bookfair = Bookfair::with('palletassignments')->find($bookfair_id);
         $pallets = array();
@@ -60,35 +72,47 @@ class FormsController extends BaseController {
             $pallets[$assignment->pallet_name][] = $assignment;
         }
         // $pallets = Pallet::with('assignments', 'winterAssignments')->orderBy('name')->get();
-        $filename = "pallet_desc_" . date('Ymd') . ".pdf";
+        $filename = $this->filename($bookfair, 'pallet_desc');
         $pdf = new PalletDescriptions($bookfair->year, $bookfair->season, $pallets);
+        return Response::make($pdf->Output($filename, 'S'), 200, array('Content-Type'=>'application/pdf'));
+    }
+    
+    public function pallettally($bookfair_id) {
+        // Produces a PDF document used to track pallets for a bookfair.
+        // Seq#, Section(s), Date wrapped, Initials
+        $bookfair = Bookfair::find($bookfair_id);
+        $filename = $this->filename($bookfair, 'pallet_tally');
+        //TODO: Currently outputs 144 pallets. Need to calculate per bookfair. Winter is 24-36. Spring/Autumn 144. 
+        $pdf = new PalletTallySheet($bookfair);
         return Response::make($pdf->Output($filename, 'S'), 200, array('Content-Type'=>'application/pdf'));
     }
 
     public function summary($bookfair_id) {
         $bookfair = Bookfair::with('totalStock', 'salesSummary', 'salesTotals')->find($bookfair_id);
-        $filename = $bookfair->season . $bookfair->year . "_salesummary.pdf";
+        $filename = $this->filename($bookfair, 'salesummary');
         $pdf = new SalesSummary($bookfair); 
         return Response::make($pdf->Output($filename, 'S'), 200, array('Content-Type'=>'application/pdf'));
     }
 
-   public function tallysheets($bookfair_id, $division_id = null) {
+   public function salestallysheets($bookfair_id, $division_id = null) {
         $bookfair = Bookfair::find($bookfair_id);
         if (is_null($division_id)) {
             $data = Sale::forBookfair($bookfair_id)
-                ->orderBy(DB::raw('(SELECT section_id FROM categories WHERE id = category_id)'), 'asc')
+                ->with('section')
+                ->orderBy(DB::raw('(SELECT name FROM sections WHERE id = section_id)'), 'asc')
                 ->orderBy('label', 'asc')
                 ->orderBy('name', 'asc')
                 ->get();
         } else {
             $data = Sale::forDivision($bookfair_id, $division_id)
-                ->orderBy(DB::raw('(SELECT section_id FROM categories WHERE id = category_id)'), 'asc')
+                ->with('section')
+                ->orderBy(DB::raw('(SELECT name FROM sections WHERE id = section_id)'), 'asc')
                 ->orderBy('label', 'asc')
                 ->orderBy('name', 'asc')
                 ->get();
         }
         if (!is_null($bookfair)) {           
-            $filename = $bookfair->season . $bookfair->year . "_tallysheets.pdf";
+            $filename = $this->filename($bookfair, 'tallysheets');
             $pdf = new SalesDataCaptureForm($bookfair, $data);            
             return Response::make($pdf->Output($filename, 'S'), 200, array('Content-Type'=>'application/pdf'));
         } else {
