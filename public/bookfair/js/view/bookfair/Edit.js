@@ -54,6 +54,8 @@ Ext.define('Warehouse.view.bookfair.Edit', {
                             {
                                 xtype: 'timefield',
                                 name : 'fri_open',
+                                format: 'g:i A',
+                                submitFormat: 'Hi',
                                 fieldLabel: 'Opening Time',
                                 minValue: '8:00 AM',
                                 maxValue: '6:00 PM',
@@ -61,6 +63,8 @@ Ext.define('Warehouse.view.bookfair.Edit', {
                             }, {
                                 xtype: 'timefield',
                                 name : 'fri_close',
+                                format: 'g:i A',
+                                submitFormat: 'Hi',
                                 fieldLabel: 'Closing Time',
                                 minValue: '8:00 AM',
                                 maxValue: '6:00 PM',
@@ -75,6 +79,8 @@ Ext.define('Warehouse.view.bookfair.Edit', {
                             }, {
                                 xtype: 'timefield',
                                 name : 'sat_open',
+                                format: 'g:i A',
+                                submitFormat: 'Hi',
                                 fieldLabel: 'Opening Time',
                                 minValue: '8:00 AM',
                                 maxValue: '6:00 PM',
@@ -82,6 +88,8 @@ Ext.define('Warehouse.view.bookfair.Edit', {
                             }, {
                                 xtype: 'timefield',
                                 name : 'sat_close',
+                                format: 'g:i A',                                
+                                submitFormat: 'Hi',
                                 fieldLabel: 'Closing Time',
                                 minValue: '8:00 AM',
                                 maxValue: '6:00 PM',
@@ -96,6 +104,8 @@ Ext.define('Warehouse.view.bookfair.Edit', {
                             }, {
                                 xtype: 'timefield',
                                 name : 'sun_open',
+                                format: 'g:i A',
+                                submitFormat: 'Hi',
                                 fieldLabel: 'Opening Time',
                                 minValue: '8:00 AM',
                                 maxValue: '6:00 PM',
@@ -103,6 +113,8 @@ Ext.define('Warehouse.view.bookfair.Edit', {
                             }, {
                                 xtype: 'timefield',
                                 name : 'sun_close',
+                                format: 'g:i A',
+                                submitFormat: 'Hi',
                                 fieldLabel: 'Closing Time',
                                 minValue: '8:00 AM',
                                 maxValue: '6:00 PM',
@@ -133,12 +145,12 @@ Ext.define('Warehouse.view.bookfair.Edit', {
                                     form.updateRecord();
                                     form.getRecord().setDirty();
                                     errors = form.getRecord().validate();
-                                    console.log(errors);
                                     if (errors.isValid()) {
                                         //record.set(values);
-                                        console.log("Form is valid", store);
                                         store.sync({
-                                            success: function() { console.log("sync ok"); Ext.getCmp("bookfaireditor").close(); },
+                                            success: function() { 
+                                                Ext.getCmp("bookfaireditor").close(); 
+                                            },
                                             failure: function(batch, options) {
                                                 // TODO: Test this. 
                                                 // Extract server side validation errors
@@ -148,13 +160,10 @@ Ext.define('Warehouse.view.bookfair.Edit', {
                                                     var msg = serverErrors[field].join(",");
                                                     errors.add(undefined, {field: field, message: msg });
                                                 });
-                                                console.log("Sync failed");
                                                 Ext.getCmp("bookfaireditor").down('form').getForm().markInvalid(errors);
                                             }
                                         });
-console.log("sync called");
                                     } else {
-                                        console.log("Form is not valid");
                                         form.markInvalid(errors);
                                     }                
                                 }
