@@ -12,6 +12,7 @@ class CreateAllTables extends Migration {
      */
     public function up() {
         CreateAllTables::create_tablegroups_table();
+        CreateAllTables::create_pallets_table();
         CreateAllTables::create_people_table();
         CreateAllTables::create_users_table();
         CreateAllTables::create_divisions_table();
@@ -40,13 +41,14 @@ class CreateAllTables extends Migration {
         Schema::dropIfExists('divisions');
         Schema::dropIfExists('users');
         Schema::dropIfExists('people');
+        Schema::dropIfExists('pallets');
         Schema::dropIfExists('table_groups');
     }
 
     public function create_attendances_table() {
         Schema::create('attendances', function(Blueprint $table) {
             $table->engine = 'InnoDB';
-            $table->increment('id');
+            $table->increments('id');
             $table->integer('bookfair_id')->unsigned();
             $table->date('day');
             $table->integer('start_hr')->unsigned();
@@ -67,12 +69,12 @@ class CreateAllTables extends Migration {
             $table->date('end_date');
             $table->integer('duration')->unsigned()->default(3);
             $table->boolean('bag_sale')->default(true);
-            $table->integer('fri_open')->nullable();
-            $table->integer('fri_close')->nullable();
-            $table->integer('sat_open')->nullable();
-            $table->integer('sat_close')->nullable();
-            $table->integer('sun_open')->nullable();
-            $table->integer('sun_close')->nullable();
+            $table->string('fri_open',4)->nullable();
+            $table->string('fri_close',4)->nullable();
+            $table->string('sat_open',4)->nullable();
+            $table->string('sat_close',4)->nullable();
+            $table->string('sun_open',4)->nullable();
+            $table->string('sun_close',4)->nullable();
             $table->boolean('locked')->default(true);
             $table->unique(array('year', 'season'), 'uq_bookfair_season');
         });
@@ -105,6 +107,14 @@ class CreateAllTables extends Migration {
         });
     }
 
+    public function create_pallets_table() {
+        Schema::create('pallets', function(Blueprint $table) {
+            $table->engine = 'InnoDB';
+            $table->increments('id');
+            $table->string('name', 50)->unique();
+        });
+    }
+     
     public function create_people_table() {
         Schema::create('people', function(Blueprint $table) {
             $table->engine = 'InnoDB';
