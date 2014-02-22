@@ -57,7 +57,8 @@ Ext.define('Warehouse.view.section.List' ,{
                         var store = Ext.data.StoreManager.lookup('divisionStore');
                         return store.getById(value).get('name');
                     },
-                    editor: new Ext.form.field.ComboBox({
+                    editor: {
+                        xtype: 'combobox',
                         typeAhead: true,
                         triggerAction: 'all',
                         selectOnTab: true,
@@ -68,7 +69,7 @@ Ext.define('Warehouse.view.section.List' ,{
                         valueField: 'id',
                         queryMode: 'local',
                         forceSelection: 'true'
-                    })
+                    }
                  }, {
             		header: 'Section',
             		dataIndex: 'name',

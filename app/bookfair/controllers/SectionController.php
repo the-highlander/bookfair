@@ -16,8 +16,10 @@ class SectionController extends BaseController {
                     'allocate_tables'=> Input::get('allocate_tables'),
                     'division_id'    => Input::get('division_id')  // TODO: Use eloquent attach?
                 ));
-                Division::find(Input::get('division_id'))->sections()->insert($data);
-                return Section::find($section->id);
+                $divid = Input::get('division_id');
+                $division = Division::find($divid);
+                $section->division()->associate($division);
+                return $section;
             } catch (Exception $e) {
                 // TODO: Pretty up the exception message. Currently its the SQL dump. Not pretty
                 return Response::make(json_encode(array(
@@ -45,9 +47,9 @@ class SectionController extends BaseController {
                     'data'    => null
                 )));
             } else {
-                $deletedSection = $section;
+                $deletedrow = $section;
                 $section->delete();
-                return Response::make($deletedSection->toJson());
+                return $deletedrow;
             }
         } else {
             return Response::make(json_encode(array(
@@ -81,10 +83,13 @@ class SectionController extends BaseController {
             try {
                 $section = Section::find(Input::get('id'));
                 $section->name = Input::get('name');
-                $section->allocate_tables = Input::get('allocate_tables');
-                $section->division_id = Input::get('division_id');
                 $section->save();
-                return Response::make($section->toJson());
+                $divid = Input::get('division_id');
+                if ($section->division_id <> $divid) {
+                    $newdiv = Division::find($divid);
+                    $section->division()->associate($newdiv);
+                }
+                return $section;
             } catch (Exception $e) {
                 // TODO: Pretty up the exception message. Currently its the SQL dump. Not pretty
                 return Response::json_encode(array(
