@@ -18,25 +18,25 @@ Ext.define('Warehouse.model.Bookfair', {
         {name: 'sat_close', type: 'date', dateFormat: 'Hi'},
         {name: 'sun_open', type: 'date', dateFormat: 'Hi'},
         {name: 'sun_close', type: 'date', dateFormat: 'Hi'},
-        {name: 'duration', type: 'int' },
+        {name: 'duration', type: 'int'},
         {name: 'bag_sale', type: 'boolean'},
         {name: 'locked', type: 'boolean'},
         {
-            name: 'attendance', 
-            type: 'int', 
-            convert: function (v, record) {
+            name: 'attendance',
+            type: 'int',
+            convert: function(v, record) {
                 return record.raw.total_attendance.length > 0 ? record.raw.total_attendance[0].value : 0;
             }},
         {
-            name: 'stock', 
-            type: 'int', 
-            convert: function (v, record) {
+            name: 'stock',
+            type: 'int',
+            convert: function(v, record) {
                 return record.raw.sales_totals.length > 0 ? record.raw.sales_totals[0].total_stock : 0;
             }
         }, {
-            name: 'sold', 
-            type: 'float', 
-            convert: function (v, record) {
+            name: 'sold',
+            type: 'float',
+            convert: function(v, record) {
                 var sold = 0;
                 if (record.raw.sales_totals.length > 0) {
                     if (record.raw.sales_totals[0].total_stock > 0) {

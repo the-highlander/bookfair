@@ -1,15 +1,15 @@
 /*
-* File: Warehouse/model/Sale.js
-*/
+ * File: Warehouse/model/Sale.js
+ */
 Ext.define('Warehouse.model.Sale', {
-	extend: 'Ext.data.Model',
-	fields: [
-		{name: 'id', type: 'int'},
+    extend: 'Ext.data.Model',
+    fields: [
+        {name: 'id', type: 'int'},
         {name: 'bookfair_id', type: 'int'},
         {name: 'section_id', type: 'int', mapping: 'category.section.id'},
         {name: 'category_id', type: 'int'},
         {name: 'table_group_id', type: 'int'},
-		{name: 'label', type: 'string'},
+        {name: 'label', type: 'string'},
         {name: 'section_name', type: 'string', mapping: 'category.section.name'},
         {name: 'name', type: 'string'},
         {name: 'measure', type: 'string'},
@@ -37,15 +37,15 @@ Ext.define('Warehouse.model.Sale', {
         {name: 'total_sold', type: 'float'},
         {name: 'total_unsold', type: 'float'}
     ],
-	validations: [
+    validations: [
         // prohibit negative numbers.
         // is it possible to do more complex validation re display+reserve < previous display+reserve+extras
- 		{type: 'inclusion', field: 'measure', list: ['box', 'table', 'percent']}
+        {type: 'inclusion', field: 'measure', list: ['box', 'table', 'percent']}
     ],
-    proxy:  Ext.create('Warehouse.data.proxy.Restful', {
+    proxy: Ext.create('Warehouse.data.proxy.Restful', {
         url: 'statistics/bookfair/{bookfair}/sales'
     })
 //    associations: [
 //        { type: 'belongsTo', model: 'Warehouse.model.Category' }
 //    ],
-})
+});

@@ -1,10 +1,10 @@
 /*
-* File: Warehouse/model/TableGroup.js
-*/
+ * File: Warehouse/model/TableGroup.js
+ */
 Ext.define('Warehouse.model.TableGroup', {
-	extend: 'Ext.data.Model',
-	fields: [
-		{name: 'id', type: 'int'},
+    extend: 'Ext.data.Model',
+    fields: [
+        {name: 'id', type: 'int'},
         {name: 'name', type: 'string'},
         {name: 'location', type: 'string'},
         {name: 'room', type: 'string'},
@@ -16,4 +16,4 @@ Ext.define('Warehouse.model.TableGroup', {
 //    associations: [
 //        { type: 'hasMany', model: 'Warehouse.model.Category' }
 //    ],
-})
+});
