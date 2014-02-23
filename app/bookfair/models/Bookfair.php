@@ -138,9 +138,13 @@ class Bookfair extends Eloquent  {
                 DB::raw('MAX(label) AS maxlabel'))
             ->groupBy(
                 'pallet_id', 
-                'section_id', 
-                DB::raw('(SELECT min(c1.label) FROM statistics c1 WHERE c1.section_id = statistics.section_id AND c1.pallet_id <> statistics.pallet_id AND c1.label > statistics.label)'),
-                DB::raw('substr(label, 1, 1)'))
+                'section_id',
+                DB::raw('(SELECT MIN(label) FROM statistics t2 ' .
+                           'WHERE t2.label IS NOT NULL ' .
+                             'AND t2.label > statistics.label ' .
+                             'AND t2.bookfair_id = statistics.bookfair_id ' .
+                             'AND (t2.section_id <> statistics.section_id ' .
+                               'OR t2.pallet_id <> statistics.pallet_id))'))
             ->orderBy(DB::raw('pallets.name, sections.name, minlabel'));            
     }
 
