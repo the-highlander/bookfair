@@ -7,19 +7,15 @@ use BaseController;
 use Input;
 use Response;
 
-class TableGroupController extends BaseController {
+class PalletController extends BaseController {
 
     public function create() {
-        if (Auth::user()->can('Create TableGroups')) {
+        if (Auth::user()->can('Create Pallets')) {
             try {
-                $group = TableGroup::create(array(
-                            'name' => Input::get('year'),
-                            'location' => Input::get('season'),
-                            'room' => Input::get('location'),
-                            'tables' => Input::get('start_date'),
-                            'table_type' => Input::get('duration'),
+                $pallet = Pallet::create(array(
+                            'name' => Input::get('name'),
                 ));
-                return $group;
+                return Response::make($pallet->toJson());
             } catch (Exception $e) {
                 // TODO: Pretty up the exception message. Currently its the SQL dump. Not pretty
                 return Response::make(json_encode(array(
@@ -38,17 +34,17 @@ class TableGroupController extends BaseController {
     }
 
     public function destroy($id) {
-        if (Auth::user()->can('Delete Table Groups')) {
-            $group = TableGroup::find($id);
-            if (is_null($group)) {
+        if (Auth::user()->can('Delete Pallets')) {
+            $pallet = Bookfair::find($id);
+            if (is_null($pallet)) {
                 return Response::make(json_encode(array(
                             'success' => false,
-                            'message' => 'Table Group ' . $id . ' not found',
+                            'message' => 'Pallet ' . $id . ' not found',
                             'data' => null)));
             } else {
-                $deleted = $group;
-                $group->delete();
-                return $deleted;
+                $deleted = $pallet;
+                $pallet->delete();
+                return Response::make($deleted->toJson());
             }
         } else {
             return Response::make(json_encode(array(
@@ -60,34 +56,29 @@ class TableGroupController extends BaseController {
     }
 
     public function index() {
-        // No special privileges for reading tablegroups
-        return TableGroup::orderBy('name', 'asc')->get();
+// No special privileges for reading bookfairs
+        return Pallet::orderBy('name', 'asc')->get();
     }
 
     public function show($id) {
-        $group = TableGroup::find($id);
-        if (is_null($group)) {
+        $pallet = Pallet::find($id);
+        if (is_null($pallet)) {
             return Response::make(json_encode(array(
                         'success' => false,
-                        'message' => 'Tablegroup ' . $id . ' not found',
+                        'message' => 'Pallet ' . $id . ' not found',
                         'data' => null)));
         } else {
-            return $group;
+            return Response::make($pallet->toJson());
         }
     }
 
     public function update($id) {
-        if (Auth::user()->can('Update TableGroups')) {
+        if (Auth::user()->can('Update Pallets')) {
             try {
-                $group = TableGroup::find($id);
-                $group->unguard();
-                $group->year = Input::get('name');
-                $group->season = Input::get('season');
-                $group->location = Input::get('location');
-                $group->start_date = Input::get('tables'); // \DateTime::createFromFormat('Y-m-d', Input::get('start_date);
-                $group->duration = Input::get('table_type');
-                $group->save();
-                return $group;
+                $pallet = Bookfair::find($id);
+                $pallet->name = Input::get('name');
+                $pallet->save();
+                return Response::make($pallet->toJson());
             } catch (Exception $e) {
                 // TODO: Pretty up the exception message. Currently its the SQL dump. Not pretty
                 return Response::make(json_encode(array(

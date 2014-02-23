@@ -83,12 +83,12 @@ class SectionController extends BaseController {
             try {
                 $section = Section::find(Input::get('id'));
                 $section->name = Input::get('name');
-                $section->save();
                 $divid = Input::get('division_id');
                 if ($section->division_id <> $divid) {
                     $newdiv = Division::find($divid);
                     $section->division()->associate($newdiv);
                 }
+                $section->save();
                 return $section;
             } catch (Exception $e) {
                 // TODO: Pretty up the exception message. Currently its the SQL dump. Not pretty

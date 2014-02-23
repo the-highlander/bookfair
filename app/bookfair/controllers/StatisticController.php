@@ -1,6 +1,7 @@
-<?php 
+<?php
 
 namespace Bookfair;
+
 use Auth;
 use BaseController;
 use Input;
@@ -9,59 +10,62 @@ use DB;
 
 class StatisticController extends BaseController {
 
-    public function allocations ($bookfair_id) {
+    public function allocations($bookfair_id) {
         // TODO:: Security?? In the route??
         return Allocation::with('category.section', 'tablegroup')->forBookfair($bookfair_id)->get();
     }
 
-    public function sales ($bookfair_id) {
+    public function sales($bookfair_id) {
         // TODO:: Security?? In the route??
         return Sale::with('category.section')->forBookfair($bookfair_id)->get();
     }
 
-    public function targets ($bookfair_id) {
+    public function targets($bookfair_id) {
         // TODO:: Security?? In the route??
-        return Target::with('category.section', 'tablegroup')->forBookfair($bookfair_id)->get();
+        return Target::with('category.section', 'pallet')->forBookfair($bookfair_id)->get();
     }
 
-    public function destroy ($id) {
+    public function destroy($bookfair_id, $stats_id) {
         //TODO: Security Check if (Auth::user()->can('Delete Sections')) {
-        $statistic = Statistic::find($id);
+        $statistic = Statistic::find($stats_id);
         if (is_null($statistic)) {
             return Response::make(json_encode(array(
-                'success' => false, 
-                'message' => 'Section ' . $id . ' not found', 
-                'data'    => null
+                        'success' => false,
+                        'message' => 'Statistics Record ' . $id . ' not found',
+                        'data' => null
             )));
         } else {
-            $deletedStat = $statistic;
+            $deletedRow = $statistic;
             $statistic->delete();
-            return Response::make($deletedStat->toJson());
+            return $deletedRow;
         }
     }
 
-
-   public function updateallocation ($bookfair_id, $id) {
-    //TODO: Security Check
-            try {
-                $allocation = Allocation::with('category.section', 'tablegroup')->find($id);
-                $allocation->packed = Input::get('packed');
-                $allocation->loading = Input::get('loading');
-                $allocation->tablegroup_id = Input::get('tablegroup_id');
-                $allocation->allocated = Input::get('allocated');
-                $allocation->suggested = Input::get('suggested');
-                $allocation->save();
-                return $allocation;
-            } catch (Exception $e) {
-                //TODO: Pretty up the exception emssage.
-                return Response::json(array(
-                    'success' => false,
-                    'message' => $e->getMessage(),
-                    'data'    => null));
-            };
+    public function updateallocation($bookfair_id, $id) {
+        //TODO: Security Check
+        try {
+            $allocation = Allocation::with('category.section', 'tablegroup')->find($id);
+            $allocation->packed = Input::get('packed');
+            $allocation->loading = Input::get('loading');
+            $allocation->allocated = Input::get('allocated');
+            $allocation->suggested = Input::get('suggested');
+            $grpid = Input::get('tablegroup_id');
+            if ($allocation->tablegroup_id <> $grpid) {
+                $newgroup = TableGroup::find($grpid);
+                $allocation->tablegroup()->associate($newgroup);
+            }
+            $allocation->save();
+            return $allocation;
+        } catch (Exception $e) {
+            //TODO: Pretty up the exception emssage.
+            return Response::json(array(
+                        'success' => false,
+                        'message' => $e->getMessage(),
+                        'data' => null));
+        };
     }
 
-   public function updatesales ($bookfair_id, $id) {
+    public function updatesales($bookfair_id, $id) {
         // updating daily stock values and computing amount sold based on value of measure
         // Post will be a single stock item (on update of grid)
         if (Auth::user()->can('Stocktake')) {
@@ -91,37 +95,40 @@ class StatisticController extends BaseController {
             } catch (Exception $e) {
                 // TODO: Pretty up the exception message. Currently its the SQL dump. Not pretty
                 return Response::json(array(
-                    'success' => false,
-                    'message' => $e->getMessage(),
-                    'data'    => null));
+                            'success' => false,
+                            'message' => $e->getMessage(),
+                            'data' => null));
             }
         } else {
-            return Response::json(array('success'=>false, 'message'=>'Insufficient Privileges', 'data'=>null));
+            return Response::json(array('success' => false, 'message' => 'Insufficient Privileges', 'data' => null));
         }
     }
 
-   public function updatetargets ($bookfair_id, $id) {
-    //TODO: Security Check
-            try {
-                $target = Target::find($id);
-                $target->name = Input::get('name');
-                $target->label = Input::get('label');
-                $target->measure = Input::get('measure');
-                $target->tablegroup_id = Input::get('tablegroup_id');
-                $target->target = Input::get('target');
-                $target->allocate = Input::get('allocate');
-                $target->track = Input::get('track');
-                $target->save();
-                $pallet = Pallet::find(Input::get('pallet'));
+    public function updatetargets($bookfair_id, $id) {
+        //TODO: Security Check
+        try {
+            $target = Target::find($id);
+            $target->name = Input::get('name');
+            $target->label = Input::get('label');
+            $target->measure = Input::get('measure');
+            $target->tablegroup_id = Input::get('tablegroup_id');
+            $target->target = Input::get('target');
+            $target->allocate = Input::get('allocate');
+            $target->track = Input::get('track');
+            $palletid = Input::get('pallet_id');
+            if ($target->pallet_id <> $palletid) {
+                $pallet = Pallet::find(Input::get('pallet_id'));
                 $target->pallet()->associate($pallet);
-                $target->associate($pallet);
-            } catch (Exception $e) {
-                //TODO: Pretty up the exception emssage.
-                return Response::json(array(
-                    'success' => false,
-                    'message' => $e->getMessage(),
-                    'data'    => null));
-            };
+            }
+            $target->save();
+            return $target;
+        } catch (Exception $e) {
+            //TODO: Pretty up the exception emssage.
+            return Response::json(array(
+                        'success' => false,
+                        'message' => $e->getMessage(),
+                        'data' => null));
+        };
     }
 
 }
