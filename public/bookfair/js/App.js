@@ -23,6 +23,9 @@ Ext.define('Warehouse.App', {
         this.divisionStore = Ext.create('Warehouse.store.Divisions', {
             storeId: 'divisionStore'
         });
+        this.sectionStore = Ext.create('Warehouse.store.Sections', {
+            storeId: 'sectionStore'
+        });
         this.tableGroupStore = Ext.create('Warehouse.store.TableGroups', {
             storeId: 'tableGroupStore'
         });
