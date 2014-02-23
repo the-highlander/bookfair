@@ -1,9 +1,9 @@
 /*
-* File: Warehouse/view/statistics/Sales.js
-*/
+ * File: Warehouse/view/statistics/Sales.js
+ */
 Ext.define('Warehouse.view.statistics.Sales', {
-   extend: 'Ext.grid.Panel',
-    alias : 'widget.sales',
+    extend: 'Ext.grid.Panel',
+    alias: 'widget.sales',
     requires: [
         'Warehouse.data.proxy.Restful',
         'Ext.grid.feature.GroupingSummary',
@@ -12,24 +12,23 @@ Ext.define('Warehouse.view.statistics.Sales', {
     features: [
         {
             ftype: 'groupingsummary',
-            groupHeaderTpl: '{name} ({rows.length} Categor{[values.rows.length > 1 ? "ies" : "y"]})' ,
+            groupHeaderTpl: '{name} ({rows.length} Categor{[values.rows.length > 1 ? "ies" : "y"]})',
             id: 'StatsGrouping',
             enableGroupingMenu: false,
             enableNoGroups: false,
             startCollapsed: true
-        }, { 
+        }, {
             ftype: 'filters',
             local: true
         }
     ],
     initComponent: function() {
-        var me = this,
-            bookfairStore = Ext.data.StoreManager.lookup('bookfairStore');
+        var me = this;
 
         Ext.apply(me, {
             loadMask: true,
-            tbar: [ //TODO: Additional buttons for show/hide columns etc. Whatever is useful.  Stats Sheet for example.
-            //TODO: Print Stats sheet from here - show table/box data if already entered.
+            tbar: [//TODO: Additional buttons for show/hide columns etc. Whatever is useful.  Stats Sheet for example.
+                //TODO: Print Stats sheet from here - show table/box data if already entered.
                 {
                     text: 'Collapse All',
                     id: 'btnCollapseAll',
@@ -43,7 +42,7 @@ Ext.define('Warehouse.view.statistics.Sales', {
             //TODO: Ability to edit data depends on security. Add plugins optionally.
             plugins: [
                 Ext.create('Ext.grid.plugin.RowEditing', {
-                    pluginId: 'stats-row-editing',
+                    pluginId: 'sales-row-editing',
                     clicksToEdit: 1,
                     autoCancel: true,
                     listeners: {
@@ -51,27 +50,26 @@ Ext.define('Warehouse.view.statistics.Sales', {
                             console.log("edit event fired");
                             Ext.data.StoreManager.lookup('salesStore').sync();
                         }
-
                     }
-                })            
-            ],            
+                })
+            ],
             columns: [
                 {
                     header: 'Section',
                     dataIndex: 'section_id',
                     hidden: true,
-                    renderer: function (value, metaData, record) {
+                    renderer: function(value, metaData, record) {
                         return record.get('section_name');
                     },
                     filter: {
                         type: 'list',
                         labelField: 'name',
-                        store:  Ext.create('Ext.data.Store', {
+                        store: Ext.create('Ext.data.Store', {
                             fields: ['id', 'name'],
                             proxy: {
                                 type: 'ajax',
                                 url: 'sections',
-                                reader: { type: 'json'}
+                                reader: {type: 'json'}
                             }
                         })
                     }
@@ -93,9 +91,9 @@ Ext.define('Warehouse.view.statistics.Sales', {
                         typeAhead: true,
                         triggerAction: 'all',
                         selectOnTab: true,
-                        store: Warehouse.data.DataSets.measures,                            
+                        store: Warehouse.data.DataSets.measures,
                         lazyRender: true,
-                        listClass: 'x-combo-list-small'                   
+                        listClass: 'x-combo-list-small'
                     },
                 }, {
                     header: 'Delivered',
@@ -136,7 +134,7 @@ Ext.define('Warehouse.view.statistics.Sales', {
                     ]
                 }, {
                     text: 'Friday',
-                    defaults: { 
+                    defaults: {
                         width: 65,
                         align: 'right',
                         xtype: 'numbercolumn',
@@ -169,7 +167,7 @@ Ext.define('Warehouse.view.statistics.Sales', {
                     ]
                 }, {
                     text: 'Saturday',
-                    defaults: { 
+                    defaults: {
                         width: 65,
                         align: 'right',
                         xtype: 'numbercolumn',
@@ -203,7 +201,7 @@ Ext.define('Warehouse.view.statistics.Sales', {
                     ]
                 }, {
                     text: 'Sunday (noon)',
-                    defaults: { 
+                    defaults: {
                         width: 65,
                         align: 'right',
                         xtype: 'numbercolumn',
@@ -236,7 +234,7 @@ Ext.define('Warehouse.view.statistics.Sales', {
                     ]
                 }, {
                     text: 'End of Bookfair',
-                    defaults: { 
+                    defaults: {
                         width: 65,
                         align: 'right',
                         xtype: 'numbercolumn',
@@ -271,18 +269,11 @@ Ext.define('Warehouse.view.statistics.Sales', {
         me.callParent();
         me.groupingFeature = me.view.getFeature('StatsGrouping');
     },
-
-    onCollapseButtonClicked: function () {
+    onCollapseButtonClicked: function() {
         var grid = this.up('sales');
         grid.groupingFeature.collapseAll();
     },
+    onSelectionChange: function(sm, recs, event) {
 
-    onSelectionChange: function (sm, recs, event) {
-        if (recs.length == 1) {    
-            Ext.getCmp('btnEditSalesData').enable();
-        } else {
-            Ext.getCmp('btnEditSalesData').disable();
-        }
-    },
-
+    }
 });
