@@ -12,6 +12,8 @@ Ext.define('Warehouse.model.Target', {
         {name: 'label', type: 'string'},
         {name: 'name', type: 'string'},
         {name: 'measure', type: 'string'},
+        {name: 'pallet_id', type: 'int'},
+        {name: 'pallet_name', type: 'string', mapping: 'pallet.name'},
         {name: 'tablegroup_id', type: 'int'},
         {name: 'tablegroup_name', type: 'string', mapping: 'tablegroup.name'},
         {name: 'target', type: 'int'},

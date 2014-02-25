@@ -8,32 +8,32 @@ class Allocation extends Statistic {
     * hide columns that are not required for table allocations
     */
     public $hidden = array(
-        'bookfair_id',
         'allocate',
-        'track',
-        'measure',
+        'bag_sold',
+        'bookfair_id',
         'delivered',
-        'start_display',
-        'start_reserve',
-        'fri_extras',
+        'end_display',
+        'end_extras',
+        'end_reserve',
         'fri_end_display',
         'fri_end_reserve',
+        'fri_extras',
         'fri_sold',
-        'sat_extras',
+        'measure',
         'sat_end_display',
         'sat_end_reserve',
+        'sat_extras',
         'sat_sold',
-        'sun_extras',
+        'start_display',
+        'start_reserve',
         'sun_end_display',
         'sun_end_reserve',
+        'sun_extras',
         'sun_sold',
-        'end_extras',
-        'end_display',
-        'end_reserve',
-        'bag_sold',
         'total_stock',
         'total_sold',
-        'total_unsold'
+        'total_unsold',
+        'track'
     );
 
     public function scopeForTablegroup($query, $bookfair, $group) {

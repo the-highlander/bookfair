@@ -15,9 +15,9 @@ Ext.define('Warehouse.view.statistics.Targets', {
             ftype: 'groupingsummary',
             groupHeaderTpl: '{name} ({rows.length} Categor{[values.rows.length > 1 ? "ies" : "y"]})',
             id: 'TargetsGrouping',
-            enableGroupingMenu: true,
-            enableNoGroups: true,
-            startCollapsed: true
+            enableGroupingMenu: false,
+            enableNoGroups: false,
+            startCollapsed: false
         }, {
             ftype: 'filters',
             local: true
@@ -46,6 +46,7 @@ Ext.define('Warehouse.view.statistics.Targets', {
                 }, '-', {
                     text: 'Collapse All',
                     id: 'btnCollapseAll',
+                    disabled: true,
                     tooltip: 'Collapse all Sections',
                     handler: me.onCollapseButtonClicked
                 }
@@ -59,11 +60,10 @@ Ext.define('Warehouse.view.statistics.Targets', {
                  Ext.create('Ext.grid.plugin.RowEditing', {
                      pluginId: 'target-row-editing',
                      clicksToEdit: 2,
-                     clickaToMove: 1,
+                     clicksToMove: 1,
                      autoCancel: true,
                      listeners: {
                          edit: function(rowEditing, context) { 
-                             console.log("edit event fired for Target");
                              Ext.data.StoreManager.lookup('targetsStore').sync();
                          }
                      }
@@ -171,6 +171,7 @@ Ext.define('Warehouse.view.statistics.Targets', {
                     dataIndex: 'track',
                     width: 60,
                     renderer: function(val) {
+                        console.log(val);
                         var checkedImg = '/bookfair/img/checked.png';
                         var uncheckedImg = '/bookfair/img/unchecked.png';
                         return '<div style="text-align:center;height:13px;overflow:visible">'
@@ -196,7 +197,6 @@ Ext.define('Warehouse.view.statistics.Targets', {
         });
         me.store.getProxy().setBookfair(this.initialConfig.bookfair.get('id'));
         me.callParent();
-        me.groupingFeature = me.view.getFeature('TargetsGrouping');
     },
     onAddButtonClicked: function() {
         console.log("You clicked the add button");
@@ -208,10 +208,8 @@ Ext.define('Warehouse.view.statistics.Targets', {
     },
     onSelectionChange: function(sm, recs, event) {
          if (recs.length === 1) {
-            Ext.getCmp('btnEditCategory').enable();
             Ext.getCmp('btnRemoveCategory').enable();
         } else {
-            Ext.getCmp('btnEditCategory').disable();
             Ext.getCmp('btnRemoveCategory').disable();
         }
     },

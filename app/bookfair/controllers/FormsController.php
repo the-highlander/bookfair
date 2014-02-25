@@ -52,7 +52,7 @@ class FormsController extends BaseController {
         // and boxes under table min(0, (boxes_packed - (allocation_ratio * tables_allocated)))
         if (!is_null($allocations)) {           
             $filename = $this->filename($bookfair, 'dropsheets');
-            $pdf = new AllocationDropSheets($bookfair, $allocations);            
+            $pdf = new AllocationDropSheets($bookfair);            
             return Response::make($pdf->Output($filename, 'S'), 200, array('Content-Type'=>'application/pdf'));
         }
     }

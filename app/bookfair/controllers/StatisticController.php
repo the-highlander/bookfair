@@ -116,7 +116,8 @@ class StatisticController extends BaseController {
             $target->allocate = Input::get('allocate');
             $target->track = Input::get('track');
             $palletid = Input::get('pallet_id');
-            if ($target->pallet_id <> $palletid) {
+            if (!is_null($palletid) && $target->pallet_id <> $palletid) {
+              // TODO: Need to be able to handle seting this to blank - disassociate?    
                 $pallet = Pallet::find(Input::get('pallet_id'));
                 $target->pallet()->associate($pallet);
             }
