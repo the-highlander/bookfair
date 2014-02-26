@@ -10,6 +10,10 @@ Ext.define('Warehouse.view.statistics.Targets', {
         'Ext.grid.feature.GroupingSummary',
         'Ext.grid.plugin.RowEditing'
     ],
+    selType : 'rowmodel',
+    selModel: { 
+        mode: 'MULTI'
+    },
     features: [
         {
             ftype: 'groupingsummary',
@@ -54,7 +58,6 @@ Ext.define('Warehouse.view.statistics.Targets', {
             store: Ext.create('Warehouse.store.Targets', {
                 storeId: 'targetsStore'
             }),
-            selType: 'rowmodel',
             //TODO: Ability to edit data depends on security. Add plugins optionally.
             plugins: [
                  Ext.create('Ext.grid.plugin.RowEditing', {
@@ -171,7 +174,6 @@ Ext.define('Warehouse.view.statistics.Targets', {
                     dataIndex: 'track',
                     width: 60,
                     renderer: function(val) {
-                        console.log(val);
                         var checkedImg = '/bookfair/img/checked.png';
                         var uncheckedImg = '/bookfair/img/unchecked.png';
                         return '<div style="text-align:center;height:13px;overflow:visible">'
@@ -207,28 +209,28 @@ Ext.define('Warehouse.view.statistics.Targets', {
         grid.groupingFeature.collapseAll();
     },
     onSelectionChange: function(sm, recs, event) {
-         if (recs.length === 1) {
-            Ext.getCmp('btnRemoveCategory').enable();
-        } else {
+         if (recs.length === 0) {
             Ext.getCmp('btnRemoveCategory').disable();
+        } else {
+            Ext.getCmp('btnRemoveCategory').enable();
         }
     },
     onRemoveButtonClicked: function() {
         var grid = this.up('targets'),
                 sm = grid.getSelectionModel(),
-                record, store = grid.getStore();
+                records, store = grid.getStore();
         if (sm.hasSelection()) {
-            record = sm.getSelection()[0];
+            records = sm.getSelection();
             Ext.Msg.show({
                 title: 'Warning',
                 icon: Ext.Msg.WARNING,
-                msg: Ext.String.format("You are about to remove <b>{0}</b> from this Bookfair. Any packing, allocation or sales data recorded against " +
-                        "this Category for this Bookfair will be lost. This operation cannot be undone. <br><br>" +
-                        "Do you wish to proceed??", record.get('name')),
+                msg: Ext.String.format("You are about to remove <b>{0}</b> from this Bookfair. Associated packing targets, " +
+                        "table allocations and sales data recorded will be lost. This operation cannot be undone. <br><br>" +
+                        "Do you wish to proceed?", records.length === 1 ? records.get('name') : records.length + ' Categories'),
                 buttons: Ext.MessageBox.OKCANCEL,
                 fn: function(button) {
                     if (button === 'ok') {
-                        store.remove(record);
+                        store.remove(records);
                         store.sync();
                     }
                 },

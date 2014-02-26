@@ -17,7 +17,6 @@ class Target extends Statistic {
         'fri_sold',
         'loading',
         'measure',
-        'pallet_id',
         'sat_end_display',
         'sat_end_reserve',
         'sat_extras',

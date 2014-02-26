@@ -72,6 +72,12 @@ Route::get('forms/bookfair/{bookfair}/pallet/packingsheets', array('uses'=>'Book
 Route::get('forms/bookfair/{bookfair}/pallet/tallysheets', array('uses'=>'Bookfair\FormsController@pallettally'));
 Route::get('forms/bookfair/{bookfair}/allocation/boxdrops', array('uses'=>'Bookfair\FormsController@boxdrops'));
 
+Route::get('pallets', array('before'=>'auth', 'uses'=>'Bookfair\PalletController@index'));
+Route::post('pallets/0', array('before'=>'auth', 'uses'=>'Bookfair\PalletController@create'));
+Route::put('pallets/{id}', array('before'=>'auth', 'uses'=>'Bookfair\PalletController@update'));
+Route::get('pallets/{id}', array('before'=>'auth', 'uses'=>'Bookfair\PalletController@show'));
+Route::delete('pallets/{id}', array('before'=>'auth', 'uses'=>'Bookfair\PalletController@destroy'));
+
 Route::get('sections', array('before'=>'auth', 'uses'=>'Bookfair\SectionController@index'));
 Route::post('sections/0', array('before'=>'auth', 'uses'=>'Bookfair\SectionController@create'));
 Route::put('sections/{id}', array('before'=>'auth', 'uses'=>'Bookfair\SectionController@update'));

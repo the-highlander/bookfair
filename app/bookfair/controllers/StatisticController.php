@@ -111,15 +111,26 @@ class StatisticController extends BaseController {
             $target->name = Input::get('name');
             $target->label = Input::get('label');
             $target->measure = Input::get('measure');
-            $target->tablegroup_id = Input::get('tablegroup_id');
             $target->target = Input::get('target');
             $target->allocate = Input::get('allocate');
             $target->track = Input::get('track');
+            $grpid = Input::get('tablegroup_id');
+            if (is_null($grpid)) {
+                $target->tablegroup_id = null;
+            } else {
+                if ($grpid <> $target->tablegroup_id) {
+                    $group = TableGroup::find($grpid);
+                    $target->tablegroup()->associate($group);
+                }
+            }
             $palletid = Input::get('pallet_id');
-            if (!is_null($palletid) && $target->pallet_id <> $palletid) {
-              // TODO: Need to be able to handle seting this to blank - disassociate?    
-                $pallet = Pallet::find(Input::get('pallet_id'));
-                $target->pallet()->associate($pallet);
+            if (is_null($palletid)) {
+                $target->pallet_id = null;
+            } else {
+                if ($palletid <> $target->pallet_id) {
+                    $pallet = Pallet::find($palletid);
+                    $target->pallet()->associate($pallet);
+                }
             }
             $target->save();
             return $target;
@@ -129,7 +140,7 @@ class StatisticController extends BaseController {
                         'success' => false,
                         'message' => $e->getMessage(),
                         'data' => null));
-        };
+        }
     }
 
 }
