@@ -64,12 +64,7 @@ Ext.define('Warehouse.view.statistics.Targets', {
                      pluginId: 'target-row-editing',
                      clicksToEdit: 2,
                      clicksToMove: 1,
-                     autoCancel: true,
-                     listeners: {
-                         edit: function(rowEditing, context) { 
-                             Ext.data.StoreManager.lookup('targetsStore').sync();
-                         }
-                     }
+                     autoCancel: true
                  })
             ],
             columns: [
@@ -231,7 +226,6 @@ Ext.define('Warehouse.view.statistics.Targets', {
                 fn: function(button) {
                     if (button === 'ok') {
                         store.remove(records);
-                        store.sync();
                     }
                 },
                 scope: this
