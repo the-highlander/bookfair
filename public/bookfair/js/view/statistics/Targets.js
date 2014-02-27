@@ -226,7 +226,7 @@ Ext.define('Warehouse.view.statistics.Targets', {
                 icon: Ext.Msg.WARNING,
                 msg: Ext.String.format("You are about to remove <b>{0}</b> from this Bookfair. Associated packing targets, " +
                         "table allocations and sales data recorded will be lost. This operation cannot be undone. <br><br>" +
-                        "Do you wish to proceed?", records.length === 1 ? records.get('name') : records.length + ' Categories'),
+                        "Do you wish to proceed?", records.length === 1 ? records[0].get('name') : records.length + ' Categories'),
                 buttons: Ext.MessageBox.OKCANCEL,
                 fn: function(button) {
                     if (button === 'ok') {
