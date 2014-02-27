@@ -15,7 +15,7 @@ class PalletController extends BaseController {
                 $pallet = Pallet::create(array(
                             'name' => Input::get('name'),
                 ));
-                return Response::make($pallet->toJson());
+                return $pallet;
             } catch (Exception $e) {
                 // TODO: Pretty up the exception message. Currently its the SQL dump. Not pretty
                 return Response::make(json_encode(array(
@@ -44,7 +44,7 @@ class PalletController extends BaseController {
             } else {
                 $deleted = $pallet;
                 $pallet->delete();
-                return Response::make($deleted->toJson());
+                return $deleted;
             }
         } else {
             return Response::make(json_encode(array(
@@ -68,7 +68,7 @@ class PalletController extends BaseController {
                         'message' => 'Pallet ' . $id . ' not found',
                         'data' => null)));
         } else {
-            return Response::make($pallet->toJson());
+            return $pallet;
         }
     }
 
@@ -78,7 +78,7 @@ class PalletController extends BaseController {
                 $pallet = Bookfair::find($id);
                 $pallet->name = Input::get('name');
                 $pallet->save();
-                return Response::make($pallet->toJson());
+                return $pallet;
             } catch (Exception $e) {
                 // TODO: Pretty up the exception message. Currently its the SQL dump. Not pretty
                 return Response::make(json_encode(array(

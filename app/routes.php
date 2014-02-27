@@ -76,7 +76,7 @@ Route::get('pallets', array('before'=>'auth', 'uses'=>'Bookfair\PalletController
 Route::post('pallets/0', array('before'=>'auth', 'uses'=>'Bookfair\PalletController@create'));
 Route::put('pallets/{id}', array('before'=>'auth', 'uses'=>'Bookfair\PalletController@update'));
 Route::get('pallets/{id}', array('before'=>'auth', 'uses'=>'Bookfair\PalletController@show'));
-Route::delete('pallets/{id}', array('before'=>'auth', 'uses'=>'Bookfair\TableGroupController@destroy'));
+Route::delete('pallets/{id}', array('before'=>'auth', 'uses'=>'Bookfair\PalletController@destroy'));
 
 Route::get('sections', array('before'=>'auth', 'uses'=>'Bookfair\SectionController@index'));
 Route::post('sections/0', array('before'=>'auth', 'uses'=>'Bookfair\SectionController@create'));
