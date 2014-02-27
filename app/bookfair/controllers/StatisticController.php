@@ -31,7 +31,7 @@ class StatisticController extends BaseController {
         if (is_null($statistic)) {
             return Response::make(json_encode(array(
                         'success' => false,
-                        'message' => 'Statistics Record ' . $id . ' not found',
+                        'message' => 'Statistics Record ' . $stats_id . ' not found',
                         'data' => null
             )));
         } else {
