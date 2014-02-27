@@ -10,14 +10,13 @@ Ext.define('Warehouse.view.statistics.Allocations', {
     ],
     //TODO: Ability to edit data depends on security. Add plugins optionally.
     plugins: [
-        'bufferedrenderer',
-        Ext.create('Ext.grid.plugin.CellEditing', {
+       Ext.create('Ext.grid.plugin.CellEditing', {
             clicksToEdit: 1,
             listeners: {
                 edit: function(editor, e) {
-                    if (e.field == 'packed') {
+                    if (e.field === 'packed') {
                         var store = Ext.data.StoreManager.lookup('allocationStore'),
-                            group = e.record.get('tablegroup_id'),
+                            group = e.record.get('tablegroup_name'),
                             tablesInGroup = e.record.get('tablegroup_tables'),
                             rows = store.getGroups(group).children,
                             totalBoxes = store.sum('packed', group)[group];
@@ -33,11 +32,23 @@ Ext.define('Warehouse.view.statistics.Allocations', {
     features: [
         {
             ftype: 'groupingsummary',
-            groupHeaderTpl: 'Group {[values.rows[0].data.tablegroup_name]} ({[values.rows[0].data.tablegroup_tables]} Tables)' ,
+            groupHeaderTpl: Ext.create('Ext.XTemplate', 
+                '{name:this.formatName} {children:this.getTableCount}',
+                {
+                    formatName: function (name) {
+                        return (name === "") ? "Ungrouped" : "Group " + name;
+                    },
+                    getTableCount: function (children) {
+                        return (children[0].get('tablegroup_name') === "") ? "" : "(" + children[0].get('tablegroup_tables') + " Tables)";
+                    }
+                }
+            ),
             id: 'allocationGrouping',
             enableGroupingMenu: false,
-            enableNoGroups: false,
-            startCollapsed: true // not working 19/1/2014
+            enableNoGroups: false
+        }, {
+            ftype: 'filters',
+            local: true
         }
     ],
     selType: 'cellmodel', // supports cell editing (delete if you go back to RowEditing) ,
@@ -151,7 +162,7 @@ Ext.define('Warehouse.view.statistics.Allocations', {
                     text: 'Discrepancy',
                     dataIndex: 'discrepancy',
                     renderer: function (value) {
-                        return value == 0 ? value : '<span style="color:red; font-weight: bold;">' + Math.abs(value) + '</span>';
+                        return value === 0 ? value : '<span style="color:red; font-weight: bold;">' + Math.abs(value) + '</span>';
                     }
                 }
             ]
@@ -172,7 +183,6 @@ Ext.define('Warehouse.view.statistics.Allocations', {
  function ObjectToString(object) {
     var string;
     var name;
-console.log(object);
     for (name in object) {
         if (typeof object[name] !== 'function') {
             string += "{\"" + name + "\": \"" + object[name] + "\"}<br />";

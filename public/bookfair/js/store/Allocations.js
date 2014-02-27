@@ -9,7 +9,7 @@ Ext.define('Warehouse.store.Allocations', {
     autoLoad: true,
     autoSync: false,
 	groupers: [{
-		property: 'tablegroup_id',
+		property: 'tablegroup_name',
 		direction: 'ASC'
 	}],
 	sorters: ['section_name', 'label', 'category_name']
