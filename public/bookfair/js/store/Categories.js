@@ -8,6 +8,5 @@ Ext.define('Warehouse.store.Categories', {
     autoLoad: true,
     autoSync: true,
     groupField: 'section_name',
-    sorters: ['section_name', 'label', 'name'],
-    filters: []
+    sorters: ['section_name', 'label', 'name']
 });

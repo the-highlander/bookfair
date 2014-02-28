@@ -15,6 +15,59 @@ class StatisticController extends BaseController {
         return Allocation::with('category.section', 'tablegroup')->forBookfair($bookfair_id)->get();
     }
 
+    public function create($bookfair_id) {
+        try {
+            $bookfair = Bookfair::find($bookfair_id);
+            $category = Category::find(Input::get('category_id'));
+            $section = Section::find(Input::get('section_id'));
+            $target = new Target(array(
+                'allocate' => Input::get('allocate'),
+                'measure' => Input::get('measure'),
+                'track' => Input::get('track'),
+                'label' => Input::get('label'),
+                'name' => Input::get('name')
+            ));
+            if ($target->measure == "") {
+                $target->measure = 'table';
+            }
+            $target->bookfair()->associate($bookfair);
+            $target->section()->associate($section);
+            $target->category()->associate($category);
+            $target->save();
+            return Target::with('category.section', 'pallet')->find($target->id);
+        } catch (Exception $e) {
+            return Response::json(array(
+                        'success' => false,
+                        'message' => $e->getMessage(),
+                        'data' => null));
+        }
+    }
+
+    public function freecats($bookfair_id) {
+        $result = Category::whereNotExists(function($query) use ($bookfair_id) {
+                    $query->select(DB::raw(1))
+                            ->from('statistics')
+                            ->whereBookfairID($bookfair_id)
+                            ->whereRaw('statistics.category_id = categories.id');
+                })->get();
+        return $result;
+    }
+
+    public function freesecs($bookfair_id) {
+        $result = Section::whereExists(function($query) use ($bookfair_id) {
+                    $query->select(DB::raw(1))
+                            ->from('categories')
+                            ->whereRaw('categories.section_id = sections.id')
+                            ->whereNotExists(function ($query) use ($bookfair_id) {
+                                $query->select(DB::raw(1))
+                                        ->from('statistics')
+                                        ->whereBookfairID($bookfair_id)
+                                        ->whereRaw('statistics.category_id = categories.id');
+                            });
+                })->get();
+        return $result;
+    }
+
     public function sales($bookfair_id) {
         // TODO:: Security?? In the route??
         return Sale::with('category.section')->forBookfair($bookfair_id)->get();

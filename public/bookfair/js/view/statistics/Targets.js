@@ -26,8 +26,7 @@ Ext.define('Warehouse.view.statistics.Targets', {
             ftype: 'filters',
             local: true
         }
-    ],
-     
+    ], 
     initComponent: function() {
         var me = this;
 
@@ -38,13 +37,13 @@ Ext.define('Warehouse.view.statistics.Targets', {
                     text: 'Add',
                     id: 'btnAddCategory',
                     tooltip: 'Add a Category',
-                    iconCls: 'icon-add',
+                    iconCls: 'bf-icon-plus',
                     handler: me.onAddButtonClicked
                 }, {
                     text: 'Remove',
                     id: 'btnRemoveCategory',
                     tooltip: 'Remove selected Category',
-                    iconCls: 'icon-remove',
+                    iconCls: 'icon-minus',
                     disabled: true,
                     handler: me.onRemoveButtonClicked
                 }, '-', {
@@ -152,8 +151,8 @@ Ext.define('Warehouse.view.statistics.Targets', {
                     dataIndex: 'allocate',
                     width: 60,
                     renderer: function(val) {
-                        var checkedImg = '/bookfair/img/checked.png';
-                        var uncheckedImg = '/bookfair/img/unchecked.png';
+                        var checkedImg = '/bookfair/img/checked.gif';
+                        var uncheckedImg = '/bookfair/img/unchecked.gif';
                         return '<div style="text-align:center;height:13px;overflow:visible">'
                                 + '<img style="vertical-align:-3px" src="'
                                 + (val ? checkedImg : uncheckedImg)
@@ -169,8 +168,8 @@ Ext.define('Warehouse.view.statistics.Targets', {
                     dataIndex: 'track',
                     width: 60,
                     renderer: function(val) {
-                        var checkedImg = '/bookfair/img/checked.png';
-                        var uncheckedImg = '/bookfair/img/unchecked.png';
+                        var checkedImg = '/bookfair/img/checked.gif';
+                        var uncheckedImg = '/bookfair/img/unchecked.gif';
                         return '<div style="text-align:center;height:13px;overflow:visible">'
                                 + '<img style="vertical-align:-3px" src="'
                                 + (val ? checkedImg : uncheckedImg)
@@ -195,9 +194,8 @@ Ext.define('Warehouse.view.statistics.Targets', {
         me.store.getProxy().setBookfair(this.initialConfig.bookfair.get('id'));
         me.callParent();
     },
-    onAddButtonClicked: function() {
-        console.log("You clicked the add button");
-        var view = Ext.widget('statsadd');
+    onAddButtonClicked: function(btn) {
+        var view = Ext.widget('statsadd', { bookfair: btn.up('targets').initialConfig.bookfair });
     },
     onCollapseButtonClicked: function() {
         var grid = this.up('targets');

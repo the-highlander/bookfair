@@ -97,7 +97,7 @@ div.ux-taskbar div.x-toolbar {
     Icon classes for desktop shortcuts and task bars
 */
 .icon-add {
-    background-image: url(../img/add.gif) !important;
+    background-image: url(../img/add.png) !important;
 }
 
 .icon-edit {

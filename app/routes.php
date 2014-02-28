@@ -32,7 +32,7 @@ Route::put('bookfairs/{bookfair}/add/category/{category}', array('before'=>'auth
 Route::put('bookfairs/{bookfair}', array('before'=>'auth', 'uses'=>'Bookfair\BookfairController@update'));
 Route::get('bookfairs/{bookfair}', array('before'=>'auth', 'uses'=>'Bookfair\BookfairController@show'));
 Route::delete('bookfairs/{bookfair}', array('before'=>'auth', 'uses'=>'Bookfair\BookfairController@destroy'));
- 
+
 Route::get('categories', array('before'=>'auth', 'uses'=>'Bookfair\CategoryController@index'));
 Route::post('categories/0', array('before'=>'auth', 'uses'=>'Bookfair\CategoryController@create'));
 Route::put('categories/{id}', array('before'=>'auth', 'uses'=>'Bookfair\CategoryController@update'));
@@ -55,9 +55,15 @@ Route::delete('people/{id}', array('before'=>'auth', 'uses'=>'Bookfair\PersonCon
 
 Route::get('statistics/bookfair/{bookfair}/allocations', array('before'=>'auth', 'uses'=>'Bookfair\StatisticController@allocations'));
 Route::put('statistics/bookfair/{bookfair}/allocations/{id}', array('before'=>'auth', 'uses'=>'Bookfair\StatisticController@updateallocation'));
+
+Route::get('statistics/bookfair/{bookfair}/freecats', array('before'=>'auth', 'uses'=>'Bookfair\StatisticController@freecats'));
+Route::get('statistics/bookfair/{bookfair}/freesecs', array('before'=>'auth', 'uses'=>'Bookfair\StatisticController@freesecs'));
+
 Route::get('statistics/bookfair/{bookfair}/sales', array('before'=>'auth', 'uses'=>'Bookfair\StatisticController@sales'));
 Route::put('statistics/bookfair/{bookfair}/sales/{id}', array('before'=>'auth', 'uses'=>'Bookfair\StatisticController@updatesales'));
+
 Route::get('statistics/bookfair/{bookfair}/targets', array('before'=>'auth', 'uses'=>'Bookfair\StatisticController@targets'));
+Route::post('statistics/bookfair/{bookfair}/targets/0', array('before'=>'auth', 'uses'=>'Bookfair\StatisticController@create'));
 Route::put('statistics/bookfair/{bookfair}/targets/{id}', array('before'=>'auth', 'uses'=>'Bookfair\StatisticController@updatetargets'));
 Route::delete('statistics/bookfair/{bookfair}/targets/{id}', array('before'=>'auth', 'uses'=>'Bookfair\StatisticController@destroy'));
 
