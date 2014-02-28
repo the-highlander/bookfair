@@ -30,6 +30,13 @@ Ext.define('Warehouse.TargetsWindow', {
                 animCollapse:false,
                 constrainHeader:true,
                 layout: 'fit',
+                tools:[{
+                    type:'refresh',
+                    tooltip: 'Refresh Data',
+                    callback: function(panel) {
+                        panel.down('targets').store.reload();
+                    }
+                }],                
                 items: [
                     {
                         xtype: 'targets',

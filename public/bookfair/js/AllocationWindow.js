@@ -27,6 +27,13 @@ Ext.define('Warehouse.AllocationWindow', {
                 animCollapse:false,
                 constrainHeader:true,
                 layout: 'fit',
+                tools:[{
+                    type:'refresh',
+                    tooltip: 'Refresh Data',
+                    callback: function(panel) {
+                        panel.down('allocations').store.reload();
+                    }
+                }],                
                 items: [
                     {
                         xtype: 'allocations',

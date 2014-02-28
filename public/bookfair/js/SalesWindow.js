@@ -27,6 +27,13 @@ Ext.define('Warehouse.SalesWindow', {
                 animCollapse:false,
                 constrainHeader:true,
                 layout: 'fit',
+                tools:[{
+                    type:'refresh',
+                    tooltip: 'Refresh Data',
+                    callback: function(panel) {
+                        panel.down('sales').store.reload();
+                    }
+                }],                
                 items: [
                     {
                         xtype: 'sales',
