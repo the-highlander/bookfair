@@ -1,3 +1,7 @@
+/*
+ * @file /model/Bookfair.js
+ * @author Russell Nash
+ */
 Ext.define('Warehouse.model.Bookfair', {
     extend: 'Ext.data.Model',
     fields: [

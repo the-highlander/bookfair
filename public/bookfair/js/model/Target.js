@@ -1,6 +1,7 @@
 /*
-* @file: model/Allocation.js
-*/
+ * @file /model/Allocation.js
+ * @author Russell Nash
+ */
 Ext.define('Warehouse.model.Target', {
     extend: 'Ext.data.Model',
     fields: [
@@ -20,10 +21,10 @@ Ext.define('Warehouse.model.Target', {
         {name: 'allocate', type: 'boolean'},
         {name: 'track', type: 'boolean'}
     ],
-    proxy:  Ext.create('Warehouse.data.proxy.Restful', {
+    proxy: Ext.create('Warehouse.data.proxy.Restful', {
         url: 'statistics/bookfair/{bookfair}/targets'
     })
 //    associations: [
 //        { type: 'belongsTo', model: 'Warehouse.model.Category' }
 //    ],
-})
+});

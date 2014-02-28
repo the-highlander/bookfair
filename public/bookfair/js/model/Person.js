@@ -1,4 +1,7 @@
-// Set up a model to use in our Store
+/*
+ * @file /model/Person.js
+ * @author Russell Nash
+ */
 Ext.define('Warehouse.model.Person', {
     extend: 'Ext.data.Model',
     fields: [

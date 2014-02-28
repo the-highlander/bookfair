@@ -1,16 +1,12 @@
 /**
-* @file: /model/Allocation.js
-* @author Russell Nash
-* @description text
-*/
+ * @file /store/Sales.js
+ * @author Russell Nash
+ */
 Ext.define('Warehouse.store.Sales', {
     extend: 'Ext.data.Store',
     model: 'Warehouse.model.Sale',
     autoLoad: true,
     autoSync: false,
-	groupers: [{
-		property: 'section_name',
-		direction: 'ASC'
-	}],
-	sorters: ['section_name', 'label', 'category_name']
+    groupField: 'section_name',
+    sorters: ['section_name', 'label', 'category_name']
 });

@@ -1,5 +1,6 @@
 /*
- * File: Warehouse/model/Sale.js
+ * @file /model/Sale.js
+ * @author Russell Nash
  */
 Ext.define('Warehouse.model.Sale', {
     extend: 'Ext.data.Model',

@@ -1,5 +1,6 @@
 /*
- * File: Warehouse/model/TableGroup.js
+ * @file /model/TableGroup.js
+ * @author Russell Nash
  */
 Ext.define('Warehouse.model.TableGroup', {
     extend: 'Ext.data.Model',

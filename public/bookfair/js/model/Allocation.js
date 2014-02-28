@@ -1,5 +1,5 @@
 /*
- * @file: model/Allocation.js
+ * @file model/Allocation.js
  * @author Russell Nash
  */
 Ext.define('Warehouse.model.Allocation', {

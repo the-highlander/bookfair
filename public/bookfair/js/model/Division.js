@@ -1,5 +1,6 @@
 /*
- * File: Warehouse/model/Division.js
+ * @file /model/Division.js
+ * @author Russell Nash
  */
 Ext.define('Warehouse.model.Division', {
     extend: 'Ext.data.Model',

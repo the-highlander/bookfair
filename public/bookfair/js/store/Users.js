@@ -1,6 +1,6 @@
 /**
- * @author Russell Nash
- * @description text
+ * file /store/Users.js
+ * @author: Russell Nash
  */
 Ext.define('Warehouse.store.Users', {
     extend: 'Ext.data.Store',

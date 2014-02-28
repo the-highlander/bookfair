@@ -1,14 +1,13 @@
 /*
-* File: warehouse/store/Categories.js
-*/
+ * @file /store/Categories.js
+ * @author Russell Nash
+ */
 Ext.define('Warehouse.store.Categories', {
-	extend: 'Ext.data.Store',
-	model: 'Warehouse.model.Category',
-	autoLoad: true,
-	autoSync: true,
-	groupers: [{
-		property: 'section_name',
-		direction: 'ASC'
-	}],
-	sorters: ['section_name', 'label', 'name']
+    extend: 'Ext.data.Store',
+    model: 'Warehouse.model.Category',
+    autoLoad: true,
+    autoSync: true,
+    groupField: 'section_name',
+    sorters: ['section_name', 'label', 'name'],
+    filters: []
 });

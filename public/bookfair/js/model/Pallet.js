@@ -1,5 +1,5 @@
 /*
- * @file: model/Pallet.js
+ * @file /model/Pallet.js
  * @author Russell Nash
  */
 Ext.define('Warehouse.model.Pallet', {
