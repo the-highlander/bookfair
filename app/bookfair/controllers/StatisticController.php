@@ -50,9 +50,13 @@ class StatisticController extends BaseController {
             $allocation->allocated = Input::get('allocated');
             $allocation->suggested = Input::get('suggested');
             $grpid = Input::get('tablegroup_id');
-            if ($allocation->tablegroup_id <> $grpid) {
-                $newgroup = TableGroup::find($grpid);
-                $allocation->tablegroup()->associate($newgroup);
+            if (is_null($grpid)) {
+                $allocation->tablegroup_id = null;
+            } else {
+                if ($grpid <> $allocation->tablegroup_id) {
+                    $group = TableGroup::find($grpid);
+                    $allocation->tablegroup()->associate($group);
+                }
             }
             $allocation->save();
             return $allocation;
@@ -62,7 +66,7 @@ class StatisticController extends BaseController {
                         'success' => false,
                         'message' => $e->getMessage(),
                         'data' => null));
-        };
+        }
     }
 
     public function updatesales($bookfair_id, $id) {
@@ -71,7 +75,6 @@ class StatisticController extends BaseController {
         if (Auth::user()->can('Stocktake')) {
             try {
                 $sale = Sale::with('category.section')->find($id);
-                $bookfair = Bookfair::find($bookfair_id);
                 // assuming label, category_name and subcategory_name cannot be changed via Sales Statistics UI
                 $sale->measure = Input::get('measure');
                 $sale->delivered = Input::get('delivered');
@@ -115,14 +118,6 @@ class StatisticController extends BaseController {
             $target->allocate = Input::get('allocate');
             $target->track = Input::get('track');
             $grpid = Input::get('tablegroup_id');
-            if (is_null($grpid)) {
-                $target->tablegroup_id = null;
-            } else {
-                if ($grpid <> $target->tablegroup_id) {
-                    $group = TableGroup::find($grpid);
-                    $target->tablegroup()->associate($group);
-                }
-            }
             $palletid = Input::get('pallet_id');
             if (is_null($palletid)) {
                 $target->pallet_id = null;
