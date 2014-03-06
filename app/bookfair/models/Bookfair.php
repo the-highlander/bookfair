@@ -41,8 +41,7 @@ class Bookfair extends Eloquent  {
     */
 
     public function allocations() {
-        return $this->hasMany('Bookfair\Allocation')
-            ->select(array('label', 'name', 'packed', 'allocation_ratio', 'tables_allocated'));
+        return $this->hasMany('Bookfair\Allocation')->orderBy('tablegroup_id')->orderBy('name');
     }
 
     public function attachPriorCatgories () {
