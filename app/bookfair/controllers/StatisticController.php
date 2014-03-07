@@ -105,6 +105,8 @@ class StatisticController extends BaseController {
             $allocation->allocated = Input::get('allocated');
             $allocation->suggested = Input::get('suggested');
             $allocation->position = Input::get('position');
+            $allocation->setup_display = Input::get('setup_display');
+            $allocation->setup_reserve = Input::get('setup_reserve');
             $grpid = Input::get('tablegroup_id');
             if (is_null($grpid)) {
                 $allocation->tablegroup_id = null;

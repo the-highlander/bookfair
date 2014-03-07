@@ -17,26 +17,11 @@ Ext.define('Warehouse.model.Allocation', {
         {name: 'section_name', type: 'string', mapping: 'category.section.name'},
         {name: 'name', type: 'string'},
         {name: 'packed', type: 'int'},
-        {name: 'loading', type: 'float'},
+        {name: 'base_load', type: 'float' },
         {name: 'suggested', type: 'float'},
         {name: 'allocated', type: 'float'},
-        {
-            name: 'display', type: 'int',
-            convert: function(val, row) {
-                return Math.floor(row.data.loading * row.data.allocated);
-            }
-        }, {
-            name: 'reserve', type: 'int',
-            convert: function(val, row) {
-                return Math.max(0, row.data.packed - Math.floor(row.data.loading * row.data.allocated));
-            }
-        }, {
-            name: 'discrepancy', type: 'int',
-            convert: function(val, row) {
-                var alloc = row.data.loading * row.data.allocated;
-                return (alloc > row.data.packed) ? row.data.packed - alloc : 0;
-            }
-        }
+        {name: 'setup_display', type: 'int'}, 
+        {name: 'setup_reserve', type: 'int'}
     ],
     proxy: Ext.create('Warehouse.data.proxy.Restful', {
         url: 'statistics/bookfair/{bookfair}/allocations'

@@ -184,10 +184,13 @@ class CreateAllTables extends Migration {
             $table->boolean('track');
             $table->string('label', 5)->nullable();
             $table->string('name', 100);
-            $table->smallInteger('target')->unsigned();
-            $table->smallInteger('packed')->unsigned()->nullable(); // boxes packed
+            $table->decimal('base_load', 6, 2)->unsigned()->default(10);
+            $table->smallInteger('target')->default(0);
+            $table->smallInteger('packed')->unsigned()->default(0); // boxes packed
             $table->decimal('suggested', 6, 2)->unsigned()->nullable(); // suggested table count
-            $table->decimal('allocated', 6, 2)->unsigned()->nullable(); // tables allocated
+            $table->decimal('allocated', 6, 2)->unsigned()->default(0); // tables allocated
+            $table->decimal('setup_display', 6, 2)->unsigned()->default(0);
+            $table->decimal('setup_reserve', 6, 2)->unsigned()->default(0);
             $table->string('measure', 7)->default('box');
             $table->decimal('delivered', 6, 2)->unsigned()->default(0); // boxes
             $table->decimal('loading', 6, 2)->unsigned()->default(0);  // Boxes per table

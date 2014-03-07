@@ -11,23 +11,8 @@ Ext.define('Warehouse.view.statistics.Allocations', {
     //TODO: Ability to edit data depends on security. Add plugins optionally.
     plugins: [
        Ext.create('Ext.grid.plugin.CellEditing', {
-            clicksToEdit: 1,
-            listeners: {
-                edit: function(editor, e) {
-                    if (e.field === 'packed') {
-                        var store = Ext.data.StoreManager.lookup('allocationStore'),
-                            group = e.record.get('tablegroup_name'),
-                            tablesInGroup = e.record.get('tablegroup_tables'),
-                            rows = store.getGroups(group).children,
-                            totalBoxes = store.sum('packed', group)[group];
-                        Ext.Array.each(rows, function(row, index, groupItSelf) {
-                            var suggested = row.get('packed') / totalBoxes * tablesInGroup;
-                            row.set('suggested', suggested);
-                        });
-                    }
-                }
-            }
-        })           
+            clicksToEdit: 1
+       })           
     ],
     features: [
         {
@@ -96,7 +81,7 @@ Ext.define('Warehouse.view.statistics.Allocations', {
             }),
             columns: [
                 {   header: '#',
-                    dataIndex: 'position'
+                    dataIndex: 'position', sortable: false, width: 20
                 }, {
                     header: 'Section',
                     dataIndex: 'section_name'
@@ -143,7 +128,7 @@ Ext.define('Warehouse.view.statistics.Allocations', {
                     }
                 }, {
                     text: 'Boxes<br />Per Table',
-                    dataIndex: 'loading',
+                    dataIndex: 'base_load',
                     editor: {
                         xtype: 'numberfield', 
                         allowBlank: false 
@@ -168,21 +153,18 @@ Ext.define('Warehouse.view.statistics.Allocations', {
                     }
                 }, {
                     text: 'Boxes<br />On Table',
-                    dataIndex: 'display' 
+                    dataIndex: 'setup_display' 
                 }, {
                     text: 'Boxes<br />Under Table',
-                    dataIndex: 'reserve'
-                }, {
-                    text: 'Discrepancy',
-                    dataIndex: 'discrepancy',
-                    renderer: function (value) {
-                        return value === 0 ? value : '<span style="color:red; font-weight: bold;">' + Math.abs(value) + '</span>';
-                    }
+                    dataIndex: 'setup_reserve'
                 }
             ],
             listeners: {
                 selectionchange: {
                     fn: me.onSelectionChange
+                },
+                edit: {
+                    fn: me.onEdit
                 }
             }
         });
@@ -191,14 +173,35 @@ Ext.define('Warehouse.view.statistics.Allocations', {
         me.groupingFeature = me.view.getFeature('allocationGrouping');
     },
 
-    
-
     onCollapseButtonClicked: function () {
         var grid = this.up('allocations');
         grid.groupingFeature.collapseAll();
         Ext.each(records, function (record, i, records) {
             record.set('position', record.get('position')+1);
         });
+    },
+    
+    onEdit: function (editor, e) {
+        var store = Ext.data.StoreManager.lookup('allocationStore'),
+            recordsInGroup = store.getGroups(e.record.get('tablegroup_name')).children,
+            tablesInGroup = e.record.get('tablegroup_tables'),
+            boxesInGroup = 0;
+        Ext.Array.each(recordsInGroup, function (row, index, rows) {
+            boxesInGroup += row.get('packed');
+        });
+        //TODO: if (e.field === 'tablegroup_id' then need to move row and recalculate both affected groups
+        if (e.field === 'packed') {
+            Ext.Array.each(recordsInGroup, function(row, index, rows) {
+                row.set('suggested', Math.round((row.get('packed') / boxesInGroup * tablesInGroup), 2));
+            });
+        }
+        if (e.record.get('allocated') === 0) {
+            e.record.set('setup_display', 0);
+            e.record.set('setup_reserve', 0);
+        } else {
+            e.record.set('setup_display', Math.min(e.record.get('packed'), Math.floor(e.record.get('allocated') * e.record.get('base_load'))));
+            e.record.set('setup_reserve', Math.max(0, e.record.get('packed') - e.record.get('setup_display')));
+        }
     },
     
     moveSelectedRow: function (grid, up) {
@@ -244,8 +247,8 @@ Ext.define('Warehouse.view.statistics.Allocations', {
         } else {
             var store = sm.getStore(),
                 pos = recs[0].get('position'),
-                name = recs[0].get('tablegroup_name'),
-                group = store.getGroups(name);
+                //TODO: When category doesn't have a tablegroup this generates an error - group is undefined
+                group = store.getGroups(recs[0].get('tablegroup_name'));
             if (pos > 1) {
                 Ext.getCmp('btnMoveUp').enable();
             } else {
