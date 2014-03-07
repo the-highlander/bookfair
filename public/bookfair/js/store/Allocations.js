@@ -8,5 +8,5 @@ Ext.define('Warehouse.store.Allocations', {
     autoLoad: true,
     autoSync: false,
     groupField: 'tablegroup_name',
-    sorters: ['section_name', 'label', 'category_name']
+    sorters: ['position']
 });

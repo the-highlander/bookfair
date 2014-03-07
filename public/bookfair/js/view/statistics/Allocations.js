@@ -72,6 +72,18 @@ Ext.define('Warehouse.view.statistics.Allocations', {
                         store.resumeEvents();
                     }
                 }, '-', {
+                    text: 'Move Up',
+                    id: 'btnMoveUp',
+                    disabled: true,
+                    tooltip: 'Move toward start of table group',
+                    handler: me.onMoveUpButtonClicked
+                }, {
+                    text: 'Move Down',
+                    id: 'btnMoveDown',
+                    disabled: true,
+                    tooltip: 'Move toward end of table group',
+                    handler: me.onMoveDownButtonClicked
+                }, '-', {
                     text: 'Collapse All',
                     id: 'btnCollapseAll',
                     tooltip: 'Collapse all Sections',
@@ -83,7 +95,9 @@ Ext.define('Warehouse.view.statistics.Allocations', {
                 storeId: 'allocationStore' 
             }),
             columns: [
-                {
+                {   header: '#',
+                    dataIndex: 'position'
+                }, {
                     header: 'Section',
                     dataIndex: 'section_name'
                 }, {
@@ -119,7 +133,7 @@ Ext.define('Warehouse.view.statistics.Allocations', {
                         }
                     )
                 }, {
-                    text: 'Total<br />Boxes',
+                    text: 'Boxes<br />Packed',
                     dataIndex: 'packed',
                     summaryType: 'sum',
                     editor: {
@@ -165,16 +179,84 @@ Ext.define('Warehouse.view.statistics.Allocations', {
                         return value === 0 ? value : '<span style="color:red; font-weight: bold;">' + Math.abs(value) + '</span>';
                     }
                 }
-            ]
+            ],
+            listeners: {
+                selectionchange: {
+                    fn: me.onSelectionChange
+                }
+            }
         });
         me.store.getProxy().setBookfair(this.initialConfig.bookfair.get('id'));
         me.callParent();
         me.groupingFeature = me.view.getFeature('allocationGrouping');
     },
 
+    
+
     onCollapseButtonClicked: function () {
         var grid = this.up('allocations');
         grid.groupingFeature.collapseAll();
+        Ext.each(records, function (record, i, records) {
+            record.set('position', record.get('position')+1);
+        });
+    },
+    
+    moveSelectedRow: function (grid, up) {
+      var record = grid.getSelectionModel().getSelection()[0];
+      if (!record) {
+          return;
+      }
+      var index = grid.getStore().indexOf(record);
+      if (up) {
+          index--;
+          if (index < 0) { 
+              return;
+          }
+          grid.getStore().getAt(index).set('position', record.get('position'));
+          record.set('position', record.get('position')-1);         
+      } else {
+          index++;
+          if (index >= grid.getStore().getCount()) { // Need to handle group!
+              return;
+          }
+          grid.getStore().getAt(index).set('position', record.get('position'));
+          record.set('position', record.get('position')+1);
+      }
+      grid.getStore().remove(record, true);
+      grid.getStore().insert(index, record);
+      grid.getSelectionModel().select(record);
+    },
+    
+    onMoveDownButtonClicked: function () {
+        var grid = this.up('allocations');
+        grid.moveSelectedRow(grid, false);
+    },
+    
+    onMoveUpButtonClicked: function () {
+        var grid = this.up('allocations');
+        grid.moveSelectedRow(grid, true);
+    },
+    
+    onSelectionChange: function(sm, recs, event) {
+        if (recs.length === 0) {
+            Ext.getCmp('btnMoveUp').disable();
+            Ext.getCmp('btnMoveDown').disable();
+        } else {
+            var store = sm.getStore(),
+                pos = recs[0].get('position'),
+                name = recs[0].get('tablegroup_name'),
+                group = store.getGroups(name);
+            if (pos > 1) {
+                Ext.getCmp('btnMoveUp').enable();
+            } else {
+                Ext.getCmp('btnMoveUp').disable();
+            };
+            if (pos < group.children.length) {
+                Ext.getCmp('btnMoveDown').enable();
+            } else {
+                Ext.getCmp('btnMoveDown').disable();
+            };
+        }
     }
 
 });

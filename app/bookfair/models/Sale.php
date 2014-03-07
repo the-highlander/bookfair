@@ -6,11 +6,12 @@ class Sale extends Statistic {
 
     public $hidden = array(
         'allocate',
-        'track',
         'packed',
-        'target',
+        'position',
+        'suggested',
         'tablegroup_id', 
-        'suggested'
+        'target',
+        'track'
     );
 
     /**

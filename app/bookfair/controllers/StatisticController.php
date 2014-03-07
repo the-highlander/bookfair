@@ -30,6 +30,8 @@ class StatisticController extends BaseController {
             if ($target->measure == "") {
                 $target->measure = 'table';
             }
+            // Calculate loading as average loading of all prior bookfairs with the same season!
+            // or previous bookfair's actual loading?
             $target->bookfair()->associate($bookfair);
             $target->section()->associate($section);
             $target->category()->associate($category);
@@ -102,6 +104,7 @@ class StatisticController extends BaseController {
             $allocation->loading = Input::get('loading');
             $allocation->allocated = Input::get('allocated');
             $allocation->suggested = Input::get('suggested');
+            $allocation->position = Input::get('position');
             $grpid = Input::get('tablegroup_id');
             if (is_null($grpid)) {
                 $allocation->tablegroup_id = null;

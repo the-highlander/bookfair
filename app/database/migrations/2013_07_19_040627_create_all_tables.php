@@ -179,12 +179,13 @@ class CreateAllTables extends Migration {
             $table->integer('category_id')->unsigned();
             $table->integer('tablegroup_id')->unsigned()->nullable();
             $table->integer('palletgroup_id')->unsigned()->nullable();
+            $table->tinyInteger('position')->unsigned()->default(1);
             $table->boolean('allocate');
             $table->boolean('track');
             $table->string('label', 5)->nullable();
             $table->string('name', 100);
-            $table->integer('target')->unsigned();
-            $table->integer('packed')->unsigned()->nullable(); // boxes packed
+            $table->smallInteger('target')->unsigned();
+            $table->smallInteger('packed')->unsigned()->nullable(); // boxes packed
             $table->decimal('suggested', 6, 2)->unsigned()->nullable(); // suggested table count
             $table->decimal('allocated', 6, 2)->unsigned()->nullable(); // tables allocated
             $table->string('measure', 7)->default('box');

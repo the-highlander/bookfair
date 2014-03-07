@@ -11,6 +11,7 @@ Ext.define('Warehouse.model.Allocation', {
         {name: 'category_id', type: 'int'},
         {name: 'tablegroup_id', type: 'int'},
         {name: 'tablegroup_name', type: 'string', mapping: 'tablegroup.name'},
+        {name: 'position', type: 'int' },
         {name: 'tablegroup_tables', type: 'int', mapping: 'tablegroup.tables'},
         {name: 'label', type: 'string'},
         {name: 'section_name', type: 'string', mapping: 'category.section.name'},
