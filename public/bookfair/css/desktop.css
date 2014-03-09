@@ -97,15 +97,25 @@ div.ux-taskbar div.x-toolbar {
     Icon classes for desktop shortcuts and task bars
 */
 .icon-add {
-    background-image: url(../img/add.png) !important;
+    background-image: url(../img/newfile.png) !important;
 }
-
 .icon-edit {
-    background-image: url(../img/gears16x16.png) !important;
+    background-image: url(../img/edit.png) !important;
 }
-
+.icon-move-up {
+    background-image: url(../img/arrow_up.png) !important;
+}
+.icon-move-down {
+    background-image: url(../img/arrow_down.png) !important;
+}
+.icon-print {
+    background-image: url(../img/print.png) !important;
+}
 .icon-remove {
     background-image: url(../img/delete.png) !important;
+}
+.icon-save {
+    background-image: url(../img/save.png) !important;
 }
 
 .user-mgmt-shortcut {
