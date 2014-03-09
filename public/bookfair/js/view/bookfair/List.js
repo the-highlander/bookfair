@@ -72,10 +72,10 @@ Ext.define('Warehouse.view.bookfair.List', {
                                 iconCls: 'edit',
                                 handler: me.onAllocateTables
                             }, {
-                                text: 'Print Allocations',
-                                id: 'mnuPrintAllocations',
+                                text: 'Print Drop Sheets',
+                                id: 'mnuPrintDropSheets',
                                 iconCls: 'print',
-                                handler: me.onPrintAllocations
+                                handler: me.onPrintDropSheets
                             }
                         ]
                     }
@@ -244,6 +244,10 @@ Ext.define('Warehouse.view.bookfair.List', {
             }
         }
     },
+    onCellDoubleClick: function(table, td, cellIndex, record, tr, rowIndex, e, eOpts) {
+        var view = Ext.widget('bookfairedit');
+        view.down('form').getForm().loadRecord(record);
+    },
     onDeleteBookfair: function(grid, rowIndex) {
         var store = grid.getStore(),
                 record = grid.getStore().getAt(rowIndex);
@@ -263,6 +267,21 @@ Ext.define('Warehouse.view.bookfair.List', {
             scope: this
         });
     },
+    onEnterSalesData: function() {
+        var grid = grid = this.up('bookfairlist'),
+                sm = grid.getSelectionModel(),
+                bookfair, me, module, win;
+        if (sm.hasSelection()) {
+            bookfair = sm.getSelection()[0];
+            module = myDesktop.getModule('sales-win');
+            module.setBookfair(bookfair);
+            console.log(module.getBookfair());
+            win = module && module.createWindow();
+            if (win) {
+                myDesktop.desktop.restoreWindow(win);
+            }
+        }
+    },
     onPackingTargets: function() {
         var grid = grid = this.up('bookfairlist'),
                 sm = grid.getSelectionModel(),
@@ -276,6 +295,18 @@ Ext.define('Warehouse.view.bookfair.List', {
                 myDesktop.desktop.restoreWindow(win);
             }
         }
+    },
+    onPrintDropSheets: function() {
+        var grid = grid = this.up('bookfairlist'),
+                sm = grid.getSelectionModel(),
+                bookfair, win;
+        if (sm.hasSelection()) {
+            bookfair = sm.getSelection()[0];
+            win = Ext.create('Warehouse.view.Print', {
+                title: Ext.String.format("Table Allocation Drop Sheets for {0} {1}", bookfair.get('season'), bookfair.get('year')),
+                url: 'forms/bookfair/' + bookfair.get('id') + '/allocation/boxdrops'
+            });
+        }        
     },
     onPrintPackingSheets: function() {
         // Wall charts for tracking boxes packed onto each pallet
@@ -316,36 +347,6 @@ Ext.define('Warehouse.view.bookfair.List', {
             });
         }
     },
-    onSelectionChange: function(sm, recs, event) {
-        if (recs.length == 1) {
-            Ext.getCmp('btnEditBookfair').enable();
-            Ext.getCmp('btnPacking').enable();
-            Ext.getCmp('btnAllocations').enable();
-            Ext.getCmp('btnSales').enable();
-        } else {
-            Ext.getCmp('btnEditBookfair').disable();
-            Ext.getCmp('btnTargets').disable();
-            Ext.getCmp('btnAllocations').disable();
-            Ext.getCmp('btnSales').disable();
-        }
-    },
-    onCellDoubleClick: function(table, td, cellIndex, record, tr, rowIndex, e, eOpts) {
-        var view = Ext.widget('bookfairedit');
-        console.log(record);
-        view.down('form').getForm().loadRecord(record);
-    },
-    onPrintAllocations: function() {
-        var grid = grid = this.up('bookfairlist'),
-                sm = grid.getSelectionModel(),
-                bookfair, win;
-        if (sm.hasSelection()) {
-            bookfair = sm.getSelection()[0];
-            //win = Ext.create('Warehouse.view.PrintTabs', {
-            //    title: Ext.String.format("Table Allocation Drop Sheets for {0} {1}", bookfair.get('season'), bookfair.get('year')),
-            //    url: 'forms/bookfair/' + bookfair.get('id') + '/allocation/boxdrop
-            //});
-        }
-    },
     onPrintSaleTallySheet: function() {
         var grid = grid = this.up('bookfairlist'),
                 sm = grid.getSelectionModel(),
@@ -380,20 +381,17 @@ Ext.define('Warehouse.view.bookfair.List', {
             });
         }
     },
-    onEnterSalesData: function() {
-        var grid = grid = this.up('bookfairlist'),
-                sm = grid.getSelectionModel(),
-                bookfair, me, module, win;
-        if (sm.hasSelection()) {
-            bookfair = sm.getSelection()[0];
-            module = myDesktop.getModule('sales-win');
-            module.setBookfair(bookfair);
-            console.log(module.getBookfair());
-            win = module && module.createWindow();
-            if (win) {
-                myDesktop.desktop.restoreWindow(win);
-            }
+    onSelectionChange: function(sm, recs, event) {
+        if (recs.length == 1) {
+            Ext.getCmp('btnEditBookfair').enable();
+            Ext.getCmp('btnPacking').enable();
+            Ext.getCmp('btnAllocations').enable();
+            Ext.getCmp('btnSales').enable();
+        } else {
+            Ext.getCmp('btnEditBookfair').disable();
+            Ext.getCmp('btnTargets').disable();
+            Ext.getCmp('btnAllocations').disable();
+            Ext.getCmp('btnSales').disable();
         }
     }
-
 });

@@ -27,18 +27,10 @@ class FormsController extends BaseController {
 
     public function details($bookfair_id) {
         // Detailed sales for each category in each section.
-        $bookfair = Bookfair::with('sections', 'totalStock')->find($bookfair_id);
-        $i = 0;
+        $bookfair = Bookfair::with('totalStock', 'sections')->find($bookfair_id);
         foreach ($bookfair->sections as $section) {
-            $section->load(array(
-                'sales'      => function($query) use ($bookfair_id) { $query->whereBookfairId($bookfair_id); },
-                'soldranks'  => function($query) use ($bookfair_id) { $query->whereBookfairId($bookfair_id); },
-                'unsoldranks'=> function($query) use ($bookfair_id) { $query->whereBookfairId($bookfair_id); },
-                'totals'     => function($query) use ($bookfair_id) { $query->whereBookfairId($bookfair_id); }
-            ));
-            $i++;
+            $section->sales = Statistic::forSection($bookfair_id, $section->id)->get();
         }
-        //return $bookfair;
         $filename = $this->filename($bookfair, 'saledetail');
         $pdf = new SalesDetail($bookfair); 
         return Response::make($pdf->Output($filename, 'S'), 200, array('Content-Type'=>'application/pdf'));
@@ -47,12 +39,16 @@ class FormsController extends BaseController {
 
     public function boxdrops($bookfair_id) {
         //TODO: Need to get this working before March 2014
-        $bookfair = Bookfair::with('allocations', 'allocations.tablegroup', 'allocations.section')->find($bookfair_id);
+        $allocations = Allocation::with('stats.category.section', 'tablegroup')->forBookfair($bookfair_id)
+                ->orderBy('tablegroup_id')
+                ->orderBy('position')
+                ->get();
+        $bookfair = Bookfair::find($bookfair_id);
         // sheet needs to show boxes on table max(boxes_packed, (allocation_ratio * tables_allocated))
         // and boxes under table min(0, (boxes_packed - (allocation_ratio * tables_allocated)))
         if (!is_null($bookfair)) {           
             $filename = $this->filename($bookfair, 'dropsheets');
-            $pdf = new AllocationDropSheets($bookfair);            
+            $pdf = new AllocationDropSheets($bookfair, $allocations);            
             return Response::make($pdf->Output($filename, 'S'), 200, array('Content-Type'=>'application/pdf'));
         }
     }

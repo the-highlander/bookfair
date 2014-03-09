@@ -26,7 +26,6 @@ class Bookfair extends Eloquent  {
                 array(
                     'bookfair_id' => $thisBookfair,
                     'category_id' => $cat["id"],
-                    'section_id' => $cat["section_id"],
                     'tablegroup_id' => $cat["tablegroup_id"],
                     'name' => $cat["name"],
                     'label'    => $cat["label"], 
@@ -40,10 +39,6 @@ class Bookfair extends Eloquent  {
     }
     */
 
-    public function allocations() {
-        return $this->hasMany('Bookfair\Allocation')->orderBy('tablegroup_id')->orderBy('name');
-    }
-
     public function attachPriorCatgories () {
         $thisBookfair = $this->id;
         $priorBookfair = Bookfair::with('categories')->whereSeason($this->season)->whereYear($this->year - 1)->get();
@@ -53,14 +48,11 @@ class Bookfair extends Eloquent  {
                 return array(
                     'bookfair_id'   => $thisBookfair,
                     'category_id'   => $cat["id"],
-                    'section_id'    => $cat["section_id"],
                     'label'         => $cat["label"], 
                     'name'          => $cat["name"],
-                    'tablegroup_id' => $cat["pivot"]["tablegroup_id"],
                     'allocate'      => ($cat["pivot"]["track"]) ? $cat["pivot"]["allocate"] : 0,
                     'track'         => $cat["pivot"]["track"],
                     'measure'       => $cat["pivot"]["measure"],
-                    'loading'       => is_null($loading) ? 0 : $loading,
                     'target'        => $cat["pivot"]["target"]
                 );
             }, $priorBookfair[0]->categories->toArray()); 
@@ -74,7 +66,7 @@ class Bookfair extends Eloquent  {
     public function categories() {
         return $this
             ->belongsToMany('Bookfair\Category', 'statistics', 'bookfair_id', 'category_id')
-            ->withPivot('allocate', 'track', 'measure', 'tablegroup_id', 'pallet_id', 'target');
+            ->withPivot('allocate', 'track', 'measure', 'pallet_id', 'target');
     }
 
     public function dailyAttendance () {
@@ -126,23 +118,25 @@ class Bookfair extends Eloquent  {
         return $this
             ->hasMany('Bookfair\Statistic')
             ->whereNotNull('pallet_id')
-            ->join('sections', 'statistics.section_id', '=', 'sections.id')
+            ->join('categories', 'statistics.category_id', '=', 'categories.id')
+            ->join('sections', 'categories.section_id', '=', 'sections.id')
             ->join('pallets', 'statistics.pallet_id', '=', 'pallets.id')
             ->select(
                 'bookfair_id', 
                 DB::raw('pallets.name AS pallet_name'), 
-                'section_id',
+                'categories.section_id',
                 DB::raw('sections.name AS section_name'), 
-                DB::raw('MIN(label) AS minlabel'), 
-                DB::raw('MAX(label) AS maxlabel'))
+                DB::raw('MIN(statistics.label) AS minlabel'), 
+                DB::raw('MAX(statistics.label) AS maxlabel'))
             ->groupBy(
                 'pallet_id', 
-                'section_id',
-                DB::raw('(SELECT MIN(label) FROM statistics t2 ' .
+                'categories.section_id',
+                DB::raw('(SELECT MIN(t2.label) FROM statistics t2, categories t3 ' .
                            'WHERE t2.label IS NOT NULL ' .
                              'AND t2.label > statistics.label ' .
                              'AND t2.bookfair_id = statistics.bookfair_id ' .
-                             'AND (t2.section_id <> statistics.section_id ' .
+                             'AND t3.id = t2.category_id ' .
+                             'AND (t3.section_id <> categories.section_id ' .
                                'OR t2.pallet_id <> statistics.pallet_id))'))
             ->orderBy(DB::raw('pallets.name, sections.name, minlabel'));            
     }
@@ -155,10 +149,10 @@ class Bookfair extends Eloquent  {
         //TODO: Need to adjust figures for box size differences -- standardise to A3 boxes.
         return $this
             ->hasMany('Bookfair\Statistic')
+            ->join('categories', 'statistics.category_id', '=', 'categories.id')
             ->select(array(
-                'bookfair_id', 'section_id', 
-                //DB::raw('(SELECT section_id FROM categories WHERE id = category_id) as section_id'),
-                DB::raw('(SELECT name FROM sections WHERE id = section_id) as section_name'),
+                'bookfair_id', 'categories.section_id',
+                DB::raw('(SELECT name FROM sections WHERE id = categories.section_id) AS section_name'),
                 DB::raw('SUM(fri_sold) AS fri_sold'),
                 DB::raw('SUM(sat_sold) AS sat_sold'),
                 DB::raw('SUM(sun_sold) AS sun_sold'),
@@ -186,12 +180,28 @@ class Bookfair extends Eloquent  {
             ))
             ->groupBy('bookfair_id');
     }            
-
+  
     public function sections() {
         return $this
-            ->belongsToMany('Bookfair\Section', 'statistics', 'bookfair_id', 'section_id')
-            ->groupBy('section_id')
-            ->orderBy('division_id')->orderBy('sections.name');
+            ->hasMany('Bookfair\Statistic')
+            ->join('categories', 'statistics.category_id', '=', 'categories.id')
+            ->join('sections', 'categories.section_id', '=', 'sections.id')
+            ->select(array(
+                'bookfair_id', 
+                'categories.section_id', 
+                'sections.id', 'sections.name', 
+                'sections.division_id',
+                DB::raw('SUM(fri_sold) AS fri_sold'),
+                DB::raw('SUM(sat_sold) AS sat_sold'),
+                DB::raw('SUM(sun_sold) AS sun_sold'),
+                DB::raw('SUM(bag_Sold) AS bag_sold'),
+                DB::raw('SUM(total_stock) AS total_stock'),
+                DB::raw('SUM(total_sold) AS total_sold'),
+                DB::raw('SUM(total_unsold) AS total_unsold'),
+                DB::raw('group_concat(distinct total_sold order by total_sold desc) as sold_ranks'),
+                DB::raw('group_concat(distinct total_unsold order by total_unsold desc) as unsold_ranks')))
+            ->groupBy('sections.id')
+            ->orderBy('sections.division_id')->orderBy('sections.name');
     }
     
     public function soldGroupConcatBySection() {
@@ -254,57 +264,4 @@ class Bookfair extends Eloquent  {
             ->orderby('tots', 'desc');
     }
     
-    //TODO::UPTOHERE  How to get a list of categories by section for a bookfair  bookfair: {.... Sectoins: [{    Categories: [{}...]} 
-    function categorySummary () {
-        //TODO: Need to adjust figures for box size differences -- standardise to A3 boxes
-    }
-    /*
-    -- Query 1 Category Summary
-SELECT s.name AS section_name, t.category_id, t.category_name, t.total_stock,
-         CONCAT(round((t.total_stock / s.total_stock * 100),2), '%') AS share_of_section,
-         CONCAT(round((t.total_stock / f.total_stock * 100),2), '%') AS share_of_bookfair,
-         t.fri_sold, t.sat_sold, t.sun_sold, t.bag_sold, t.total_sold, t.total_unsold,
-         CONCAT(round((t.fri_sold / t.total_stock * 100), 2), '%') as fri_pctsold,
-         CONCAT(round((t.sat_sold / t.total_stock * 100), 2), '%') as sat_pctsold,
-         CONCAT(round((t.sun_sold / t.total_stock * 100), 2), '%') as sun_pctsold,
-         CONCAT(round((t.bag_sold / t.total_stock * 100), 2), '%') as bag_pctsold,
-         CONCAT(round((t.total_sold / t.total_stock * 100), 2), '%') as tot_sold_pct,
-         CONCAT(round((t.total_unsold / t.total_stock * 100), 2), '%') as tot_unsold_pct,
-         FIND_IN_SET(t.total_sold, rs.ranked_values) AS soldrank,
-         FIND_IN_SET(t.total_unsold, rw.ranked_values) AS wasterank
-  FROM (SELECT c.section_id, c.name as category_name, c.id as category_id,
-                    d.fri_sold, d.sat_sold, d.sun_sold, d.bag_sold, d.total_stock,
-                    d.total_sold, d.total_unsold
-             FROM statistics d, categories c 
-             WHERE d.bookfair_id =  12
-                AND c.id = d.category_id) t 
-                            
-  JOIN (SELECT b.section_id, SUM(a.total_stock) AS total_stock 
-          FROM statistics a, categories b 
-             WHERE a.bookfair_id = 12 AND b.id = a.category_id
-             GROUP BY b.section_id) s
-                 ON s.section_id = t.section_id 
-                         
-  JOIN (SELECT SUM(a2.total_stock) AS total_stock
-          FROM statistics a2
-            WHERE a2.bookfair_id = 12) f         
-             
-  JOIN (SELECT rs3.section_id, GROUP_CONCAT(DISTINCT rs2.total_sold ORDER BY rs2.total_sold DESC) AS ranked_values
-             FROM statistics rs2, categories rs3
-            WHERE rs2.bookfair_id = 12
-               AND rs3.id = rs2.category_id
-             GROUP BY rs3.section_id) rs
-    ON rs.section_id = t.section_id
-                          
-  JOIN (SELECT rw3.section_id, GROUP_CONCAT(DISTINCT rw2.total_unsold ORDER BY rw2.total_unsold) AS ranked_values 
-             FROM statistics rw2, categories rw3 
-            WHERE rw2.bookfair_id = 12 
-               AND rw3.id = rw2.category_id
-             GROUP BY rw3.section_id) rw
-    ON rw.section_id = t.section_id
-
-  JOIN  sections s ON s.id = t.section_id
-  order by section_name, soldrank
-*/
 }
-?>

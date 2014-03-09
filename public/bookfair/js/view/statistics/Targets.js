@@ -37,13 +37,13 @@ Ext.define('Warehouse.view.statistics.Targets', {
                     text: 'Add',
                     id: 'btnAddCategory',
                     tooltip: 'Add a Category',
-                    iconCls: 'bf-icon-plus',
+                    iconCls: 'icon-add',
                     handler: me.onAddButtonClicked
                 }, {
                     text: 'Remove',
                     id: 'btnRemoveCategory',
                     tooltip: 'Remove selected Category',
-                    iconCls: 'icon-minus',
+                    iconCls: 'icon-remove',
                     disabled: true,
                     handler: me.onRemoveButtonClicked
                 }, '-', {

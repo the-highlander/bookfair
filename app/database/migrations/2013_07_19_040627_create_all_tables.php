@@ -21,6 +21,7 @@ class CreateAllTables extends Migration {
         CreateAllTables::create_bookfairs_table();
         CreateAllTables::create_attendances_table();
         CreateAllTables::create_statistics_table();
+        CreateAllTables::create_allocations_table();
         CreateAllTables::create_privileges_table();
         CreateAllTables::create_privilege_user_table();
     }
@@ -33,6 +34,7 @@ class CreateAllTables extends Migration {
     public function down() {
         Schema::dropIfExists('privilege_user');
         Schema::dropIfExists('privileges');
+        Schema::dropIfExists('allocations');
         Schema::dropIfExists('statistics');
         Schema::dropIfExists('attendances');
         Schema::dropIfExists('bookfairs');
@@ -43,6 +45,24 @@ class CreateAllTables extends Migration {
         Schema::dropIfExists('people');
         Schema::dropIfExists('pallets');
         Schema::dropIfExists('table_groups');
+    }
+
+    public function create_allocations_table() {
+        Schema::create('allocations', function(Blueprint $table) {
+            $table->engine = 'InnoDB';
+            $table->increments('id');
+            $table->integer('statistic_id')->unsigned();
+            $table->integer('tablegroup_id')->unsigned();
+            $table->tinyInteger('position')->unsigned()->default(1);
+            $table->decimal('portion',3,2)->unsigned()->default(1);
+            $table->decimal('loading', 6,2)->unsigned()->default(10);
+            $table->decimal('suggested', 6, 2)->unsigned()->default(0); // suggested table count
+            $table->decimal('tables', 6, 2)->unsigned()->default(0); // tables allocated
+            $table->decimal('display', 6, 2)->unsigned()->default(0);
+            $table->decimal('reserve', 6, 2)->unsigned()->default(0);
+            $table->foreign('statistic_id')->references('id')->on('statistics')->onDelete('cascade');
+            $table->foreign('tablegroup_id')->references('id')->on('table_groups')->onDelete('restrict');
+        });
     }
 
     public function create_attendances_table() {
@@ -175,22 +195,15 @@ class CreateAllTables extends Migration {
             $table->engine = 'InnoDB';
             $table->increments('id');
             $table->integer('bookfair_id')->unsigned();
-            $table->integer('section_id')->unsigned();
             $table->integer('category_id')->unsigned();
-            $table->integer('tablegroup_id')->unsigned()->nullable();
-            $table->integer('palletgroup_id')->unsigned()->nullable();
-            $table->tinyInteger('position')->unsigned()->default(1);
-            $table->boolean('allocate');
-            $table->boolean('track');
+            $table->integer('parent_id')->unsigned()->nullable(); // for subcategories
+            $table->integer('pallet_id')->unsigned()->nullable();
             $table->string('label', 5)->nullable();
             $table->string('name', 100);
-            $table->decimal('base_load', 6, 2)->unsigned()->default(10);
+            $table->boolean('allocate');  //TODO: Remove -- derive from existence of row in allocations table?
+            $table->boolean('track');
             $table->smallInteger('target')->default(0);
             $table->smallInteger('packed')->unsigned()->default(0); // boxes packed
-            $table->decimal('suggested', 6, 2)->unsigned()->nullable(); // suggested table count
-            $table->decimal('allocated', 6, 2)->unsigned()->default(0); // tables allocated
-            $table->decimal('setup_display', 6, 2)->unsigned()->default(0);
-            $table->decimal('setup_reserve', 6, 2)->unsigned()->default(0);
             $table->string('measure', 7)->default('box');
             $table->decimal('delivered', 6, 2)->unsigned()->default(0); // boxes
             $table->decimal('loading', 6, 2)->unsigned()->default(0);  // Boxes per table
@@ -218,10 +231,9 @@ class CreateAllTables extends Migration {
             $table->unique(array('category_id', 'bookfair_id'), 'uq_statistic_category');
             $table->index('bookfair_id');
             $table->index('section_id');
-            $table->index('tablegroup_id');
             $table->foreign('bookfair_id')->references('id')->on('bookfairs')->onDelete('cascade');
-            $table->foreign('category_id')->references('id')->on('categories')->onDelete('restrict');
-            $table->foreign('tablegroup_id')->references('id')->on('table_groups')->onDelete('set null');
+            $table->foreign('category_id')->references('id')->on('categories')->onDelete('restrict');           
+            $table->foreign('parent_id')->references('id')->on('statistics')->onDelete('set null');
         });
     }
 

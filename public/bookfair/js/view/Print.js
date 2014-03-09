@@ -14,6 +14,7 @@ Ext.define('Warehouse.view.Print', {
                 {
                     text: 'Print',
                     tooltip: 'Print',
+                    iconCls: 'icon-print',
                     handler: me.onPrint
                 }
             ],

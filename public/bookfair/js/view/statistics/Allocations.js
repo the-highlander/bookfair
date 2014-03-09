@@ -43,7 +43,6 @@ Ext.define('Warehouse.view.statistics.Allocations', {
             bookfairStore = Ext.data.StoreManager.lookup('bookfairStore');
         Ext.apply(me, {
             loadMask: true,
-            title: 'Allocations',
             tbar: [ //TODO: Additional buttons for show/hide columns etc. Whatever is useful.
                 {
                     text: 'Save',
@@ -52,21 +51,21 @@ Ext.define('Warehouse.view.statistics.Allocations', {
                     iconCls: 'icon-save',
                     handler: function (btn, event) {
                         var store = Ext.data.StoreManager.lookup('allocationStore');
-                        store.suspendEvents();
                         store.sync();
-                        store.resumeEvents();
                     }
                 }, '-', {
                     text: 'Move Up',
                     id: 'btnMoveUp',
                     disabled: true,
                     tooltip: 'Move toward start of table group',
+                    iconCls: 'icon-move-up',
                     handler: me.onMoveUpButtonClicked
                 }, {
                     text: 'Move Down',
                     id: 'btnMoveDown',
                     disabled: true,
                     tooltip: 'Move toward end of table group',
+                    iconCls: 'icon-move-down',
                     handler: me.onMoveDownButtonClicked
                 }, '-', {
                     text: 'Collapse All',
@@ -126,9 +125,23 @@ Ext.define('Warehouse.view.statistics.Allocations', {
                         allowDecimals: false, 
                         allowBlank: false 
                     }
+                }, { 
+                    text: '% In<br />This Group',
+                    dataIndex: 'portion',
+                    renderer: function(value, metaData, record, rowIndex, colIndex, store, view) {
+                        return 100 * value + "%";
+                    },
+                    editor: {
+                        xtype: 'numberfield',
+                        allowDecimals: true,
+                        allowBlank: false,
+                        maxValue: 1.00,
+                        minValue: 0.01,
+                        step: 0.01
+                    }
                 }, {
                     text: 'Boxes<br />Per Table',
-                    dataIndex: 'base_load',
+                    dataIndex: 'loading',
                     editor: {
                         xtype: 'numberfield', 
                         allowBlank: false 
@@ -141,7 +154,7 @@ Ext.define('Warehouse.view.statistics.Allocations', {
                     summaryType: 'sum'
                 }, { 
                     text: 'Number<br />of Tables',
-                    dataIndex: 'allocated',
+                    dataIndex: 'tables',
                     summaryType: 'sum',
                     editor: {
                         xtype: 'numberfield', 
@@ -153,10 +166,10 @@ Ext.define('Warehouse.view.statistics.Allocations', {
                     }
                 }, {
                     text: 'Boxes<br />On Table',
-                    dataIndex: 'setup_display' 
+                    dataIndex: 'display' 
                 }, {
                     text: 'Boxes<br />Under Table',
-                    dataIndex: 'setup_reserve'
+                    dataIndex: 'reserve'
                 }
             ],
             listeners: {
@@ -195,12 +208,12 @@ Ext.define('Warehouse.view.statistics.Allocations', {
                 row.set('suggested', Math.round((row.get('packed') / boxesInGroup * tablesInGroup), 2));
             });
         }
-        if (e.record.get('allocated') === 0) {
-            e.record.set('setup_display', 0);
-            e.record.set('setup_reserve', 0);
+        if (e.record.get('tables') === 0) {
+            e.record.set('display', 0);
+            e.record.set('reserve', 0);
         } else {
-            e.record.set('setup_display', Math.min(e.record.get('packed'), Math.floor(e.record.get('allocated') * e.record.get('base_load'))));
-            e.record.set('setup_reserve', Math.max(0, e.record.get('packed') - e.record.get('setup_display')));
+            e.record.set('display', Math.min(e.record.get('packed'), Math.floor(e.record.get('tables') * e.record.get('loading'))));
+            e.record.set('reserve', Math.max(0, e.record.get('packed') - e.record.get('display')));
         }
     },
     

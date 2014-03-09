@@ -103,8 +103,8 @@ class SalesDetail extends TCPDF {
         $fill = 0;
         $w = 14;
         $this->setStyle('normal');
-        $soldranks = explode(',', $section->soldranks[0]->ranks);
-        $unsoldranks = explode(',', $section->unsoldranks[0]->ranks);
+        $soldranks = explode(',', $section->soldranks);
+        $unsoldranks = explode(',', $section->unsoldranks);
         foreach ($section->sales as $category) {
             $rowcount++;
             if ($fill) { 
@@ -147,22 +147,21 @@ class SalesDetail extends TCPDF {
         // Total line
         $this->setStyle("title");       
         $this->Cell(55, 6, 'Totals', 'LTBR', 0, 'L', true);
-        $total = $section->totals[0];
-        $this->Cell(12, 6, number_format($total->total_stock, 0), 'LTBR', 0, 'R', 1);
-        $this->Cell($w, 6, round(($total->total_stock / $this->_bookfair->total_stock[0]->stock * 100),1) . '%', 'LTBR', 0, 'R', true);
-        $this->Cell($w, 6, number_format($total->fri_sold, 0), 'LTBR', 0, 'R', true);
-        $this->Cell($w, 6, number_format($total->sat_sold, 0), 'LTBR', 0, 'R', true);
-        $this->Cell($w, 6, number_format($total->sun_sold, 0), 'LTBR', 0, 'R', true);
-        $this->Cell($w, 6, number_format($total->bag_sold, 0), 'LTBR', 0, 'R', true);
-        $this->Cell($w, 6, number_format($total->total_sold, 0), 'LTBR', 0, 'R', true);
-        $this->Cell($w, 6, number_format($total->total_unsold, 0), 'LTBR', 0, 'R', true);
+        $this->Cell(12, 6, number_format($section->total_stock, 0), 'LTBR', 0, 'R', 1);
+        $this->Cell($w, 6, round(($section->total_stock / $this->_bookfair->total_stock[0]->stock * 100),1) . '%', 'LTBR', 0, 'R', true);
+        $this->Cell($w, 6, number_format($section->fri_sold, 0), 'LTBR', 0, 'R', true);
+        $this->Cell($w, 6, number_format($section->sat_sold, 0), 'LTBR', 0, 'R', true);
+        $this->Cell($w, 6, number_format($section->sun_sold, 0), 'LTBR', 0, 'R', true);
+        $this->Cell($w, 6, number_format($section->bag_sold, 0), 'LTBR', 0, 'R', true);
+        $this->Cell($w, 6, number_format($section->total_sold, 0), 'LTBR', 0, 'R', true);
+        $this->Cell($w, 6, number_format($section->total_unsold, 0), 'LTBR', 0, 'R', true);
         if ($category->total_stock > 0) {
-            $this->Cell($w, 6, round(($total->fri_sold / $total->total_stock * 100), 0) . '%', 'LTBR', 0, 'R', true);
-            $this->Cell($w, 6, round(($total->sat_sold / $total->total_stock * 100), 0) . '%', 'LTBR', 0, 'R', true);
-            $this->Cell($w, 6, round(($total->sun_sold / $total->total_stock * 100), 0) . '%', 'LTBR', 0, 'R', true);
-            $this->Cell($w, 6, round(($total->bag_sold / $total->total_stock * 100), 0) . '%', 'LTBR', 0, 'R', true);
-            $this->Cell($w, 6, round(($total->total_sold / $total->total_stock * 100), 0) . '%', 'LTBR', 0, 'R', true);
-            $this->Cell($w, 6, round(($total->total_unsold / $total->total_stock * 100), 0) . '%', 'LTBR', 0, 'R', true);
+            $this->Cell($w, 6, round(($section->fri_sold / $section->total_stock * 100), 0) . '%', 'LTBR', 0, 'R', true);
+            $this->Cell($w, 6, round(($section->sat_sold / $section->total_stock * 100), 0) . '%', 'LTBR', 0, 'R', true);
+            $this->Cell($w, 6, round(($section->sun_sold / $section->total_stock * 100), 0) . '%', 'LTBR', 0, 'R', true);
+            $this->Cell($w, 6, round(($section->bag_sold / $section->total_stock * 100), 0) . '%', 'LTBR', 0, 'R', true);
+            $this->Cell($w, 6, round(($section->total_sold / $section->total_stock * 100), 0) . '%', 'LTBR', 0, 'R', true);
+            $this->Cell($w, 6, round(($section->total_unsold / $section->total_stock * 100), 0) . '%', 'LTBR', 0, 'R', true);
         } else {
             for ($i=0; $i<6; $i++) {
                 $this->Cell($w, 6, ' ', 'LTBR', 0, 'C', true);

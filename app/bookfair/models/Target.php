@@ -5,7 +5,6 @@ namespace Bookfair;
 class Target extends Statistic {
 
     public $hidden = array(
-        'allocated',
         'bag_sold',
         'delivered',
         'end_display',
@@ -16,19 +15,16 @@ class Target extends Statistic {
         'fri_extras',
         'fri_sold',
         'loading',
-        'position',
         'sat_end_display',
         'sat_end_reserve',
         'sat_extras',
         'sat_sold',
         'start_display',
         'start_reserve',
-        'suggested', 
         'sun_end_display',
         'sun_end_reserve',
         'sun_extras',
         'sun_sold',
-        'tablegroup_id',
         'total_sold',
         'total_stock',
         'total_unsold'

@@ -12,14 +12,13 @@ class StatisticController extends BaseController {
 
     public function allocations($bookfair_id) {
         // TODO:: Security?? In the route??
-        return Allocation::with('category.section', 'tablegroup')->forBookfair($bookfair_id)->get();
+        return Allocation::with('stats.category.section', 'tablegroup')->forBookfair($bookfair_id)->get();
     }
 
     public function create($bookfair_id) {
         try {
             $bookfair = Bookfair::find($bookfair_id);
             $category = Category::find(Input::get('category_id'));
-            $section = Section::find(Input::get('section_id'));
             $target = new Target(array(
                 'allocate' => Input::get('allocate'),
                 'measure' => Input::get('measure'),
@@ -33,7 +32,6 @@ class StatisticController extends BaseController {
             // Calculate loading as average loading of all prior bookfairs with the same season!
             // or previous bookfair's actual loading?
             $target->bookfair()->associate($bookfair);
-            $target->section()->associate($section);
             $target->category()->associate($category);
             $target->save();
             return Target::with('category.section', 'pallet')->find($target->id);
@@ -99,14 +97,13 @@ class StatisticController extends BaseController {
     public function updateallocation($bookfair_id, $id) {
         //TODO: Security Check
         try {
-            $allocation = Allocation::with('category.section', 'tablegroup')->find($id);
-            $allocation->packed = Input::get('packed');
+            $allocation = Allocation::find($id);
             $allocation->loading = Input::get('loading');
-            $allocation->allocated = Input::get('allocated');
+            $allocation->tables = Input::get('tables');
             $allocation->suggested = Input::get('suggested');
             $allocation->position = Input::get('position');
-            $allocation->setup_display = Input::get('setup_display');
-            $allocation->setup_reserve = Input::get('setup_reserve');
+            $allocation->display = Input::get('display');
+            $allocation->reserve = Input::get('reserve');
             $grpid = Input::get('tablegroup_id');
             if (is_null($grpid)) {
                 $allocation->tablegroup_id = null;
@@ -117,7 +114,10 @@ class StatisticController extends BaseController {
                 }
             }
             $allocation->save();
-            return $allocation;
+            $stock = $allocation->stats()->first();           
+            $stock->packed = Input::get('packed');
+            $stock->save();
+            return Allocation::with('stats.category.section', 'tablegroup')->find($id);
         } catch (Exception $e) {
             //TODO: Pretty up the exception emssage.
             return Response::json(array(
