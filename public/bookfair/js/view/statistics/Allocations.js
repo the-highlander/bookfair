@@ -6,13 +6,15 @@ Ext.define('Warehouse.view.statistics.Allocations', {
     alias : 'widget.allocations',
     requires: [
         'Warehouse.data.proxy.Restful',
-        'Ext.grid.feature.GroupingSummary'
+        'Ext.grid.feature.GroupingSummary',
+        'Ext.grid.plugin.BufferedRenderer'
     ],
     //TODO: Ability to edit data depends on security. Add plugins optionally.
     plugins: [
        Ext.create('Ext.grid.plugin.CellEditing', {
             clicksToEdit: 1
-       })           
+       }),
+       { ptype: 'bufferedrenderer' }
     ],
     features: [
         {
@@ -49,10 +51,7 @@ Ext.define('Warehouse.view.statistics.Allocations', {
                     id: 'btnSaveAllocationData',
                     tooltip: 'Save changes to allocations',
                     iconCls: 'icon-save',
-                    handler: function (btn, event) {
-                        var store = Ext.data.StoreManager.lookup('allocationStore');
-                        store.sync();
-                    }
+                    handler: me.onSaveButtonClicked
                 }, '-', {
                     text: 'Move Up',
                     id: 'btnMoveUp',
@@ -190,9 +189,6 @@ Ext.define('Warehouse.view.statistics.Allocations', {
     onCollapseButtonClicked: function () {
         var grid = this.up('allocations');
         grid.groupingFeature.collapseAll();
-        Ext.each(records, function (record, i, records) {
-            record.set('position', record.get('position')+1);
-        });
     },
     
     onEdit: function (editor, e) {
@@ -203,45 +199,58 @@ Ext.define('Warehouse.view.statistics.Allocations', {
         Ext.Array.each(recordsInGroup, function (row, index, rows) {
             boxesInGroup += row.get('packed');
         });
-        //TODO: if (e.field === 'tablegroup_id' then need to move row and recalculate both affected groups
+        e.grid.suspendLayout = true;
         if (e.field === 'packed') {
             Ext.Array.each(recordsInGroup, function(row, index, rows) {
                 row.set('suggested', Math.round((row.get('packed') / boxesInGroup * tablesInGroup), 2));
             });
         }
-        if (e.record.get('tables') === 0) {
-            e.record.set('display', 0);
-            e.record.set('reserve', 0);
-        } else {
-            e.record.set('display', Math.min(e.record.get('packed'), Math.floor(e.record.get('tables') * e.record.get('loading'))));
-            e.record.set('reserve', Math.max(0, e.record.get('packed') - e.record.get('display')));
+        if (e.field === 'tablegroup_id') {
+          console.log('need to set position new group", e.record.get('tablegroup_name'));
+          store.sort();
         }
+        if (e.record.get('tables') === 0) {
+            e.record.set({
+                'display': 0,
+                'reserve': 0
+            });
+        } else {
+            e.record.set({
+                'display': Math.min(e.record.get('packed'), Math.floor(e.record.get('tables') * e.record.get('loading'))),
+                'reserve': Math.max(0, e.record.get('packed') - e.record.get('display'))
+            });
+        }
+        e.grid.suspendLayout = false;
+        e.grid.doLayout();
     },
     
     moveSelectedRow: function (grid, up) {
-      var record = grid.getSelectionModel().getSelection()[0];
+      var store = grid.getStore(), 
+          sm = grid.getSelectionModel(),
+          record = sm.getSelection()[0],
+          index, adj = 1;
       if (!record) {
           return;
       }
-      var index = grid.getStore().indexOf(record);
+      index = store.indexOf(record);
       if (up) {
           index--;
-          if (index < 0) { 
-              return;
-          }
-          grid.getStore().getAt(index).set('position', record.get('position'));
-          record.set('position', record.get('position')-1);         
+          if (index < 0) { return; }
+          adj = -1;
       } else {
           index++;
-          if (index >= grid.getStore().getCount()) { // Need to handle group!
+          if (index >= store.getCount()) { // Need to handle group!
               return;
           }
-          grid.getStore().getAt(index).set('position', record.get('position'));
-          record.set('position', record.get('position')+1);
       }
-      grid.getStore().remove(record, true);
-      grid.getStore().insert(index, record);
-      grid.getSelectionModel().select(record);
+      store.getAt(index).set('position', record.get('position'));
+      grid.suspendLayout = true;
+      record.set('position', record.get('position') + adj);       
+      store.remove(record, true);
+      store.insert(index, record);
+      sm.select(record);
+      grid.suspendLayout = false;
+      grid.doLayout();
     },
     
     onMoveDownButtonClicked: function () {
@@ -252,6 +261,15 @@ Ext.define('Warehouse.view.statistics.Allocations', {
     onMoveUpButtonClicked: function () {
         var grid = this.up('allocations');
         grid.moveSelectedRow(grid, true);
+    },
+    
+    onSaveButtonClicked: function (btn, event) {
+        var store = Ext.data.StoreManager.lookup('allocationStore');
+        var grid = this.up('allocations');
+        grid.suspendLayout = true;
+        store.sync();
+        grid.suspendLayout = false;
+        grid.doLayout();
     },
     
     onSelectionChange: function(sm, recs, event) {
