@@ -6,13 +6,15 @@ Ext.define('Warehouse.view.statistics.Allocations', {
     alias : 'widget.allocations',
     requires: [
         'Warehouse.data.proxy.Restful',
-        'Ext.grid.feature.GroupingSummary'
+        'Ext.grid.feature.GroupingSummary',
+        'Ext.grid.plugin.BufferedRenderer'
     ],
     //TODO: Ability to edit data depends on security. Add plugins optionally.
     plugins: [
        Ext.create('Ext.grid.plugin.CellEditing', {
             clicksToEdit: 1
-       })           
+       }),
+       { ptype: 'bufferedrenderer' }
     ],
     features: [
         {
@@ -196,11 +198,15 @@ Ext.define('Warehouse.view.statistics.Allocations', {
         Ext.Array.each(recordsInGroup, function (row, index, rows) {
             boxesInGroup += row.get('packed');
         });
-        //TODO: if (e.field === 'tablegroup_id' then need to move row and recalculate both affected groups
+        e.grid.suspendLayout = true;
         if (e.field === 'packed') {
             Ext.Array.each(recordsInGroup, function(row, index, rows) {
                 row.set('suggested', Math.round((row.get('packed') / boxesInGroup * tablesInGroup), 2));
             });
+        }
+        if (e.field === 'tablegroup_id') {
+          console.log('need to set position new group", e.record.get('tablegroup_name'));
+          store.sort();
         }
         if (e.record.get('tables') === 0) {
             e.record.set({
@@ -213,6 +219,8 @@ Ext.define('Warehouse.view.statistics.Allocations', {
                 'reserve': Math.max(0, e.record.get('packed') - e.record.get('display'))
             });
         }
+        e.grid.suspendLayout = false;
+        e.grid.doLayout();
     },
     
     moveSelectedRow: function (grid, up) {
@@ -236,7 +244,7 @@ Ext.define('Warehouse.view.statistics.Allocations', {
       }
       store.getAt(index).set('position', record.get('position'));
       grid.suspendLayout = true;
-      record.set('position', record.get('position') + adj);         
+      record.set('position', record.get('position') + adj);       
       store.remove(record, true);
       store.insert(index, record);
       sm.select(record);
@@ -257,7 +265,10 @@ Ext.define('Warehouse.view.statistics.Allocations', {
     onSaveButtonClicked: function (btn, event) {
         var store = Ext.data.StoreManager.lookup('allocationStore');
         var grid = this.up('allocations');
-         store.sync();
+        grid.suspendLayout = true;
+        store.sync();
+        grid.suspendLayout = false;
+        grid.doLayout();
     },
     
     onSelectionChange: function(sm, recs, event) {

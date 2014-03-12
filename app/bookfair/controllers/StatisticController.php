@@ -109,6 +109,7 @@ class StatisticController extends BaseController {
                 $allocation->tablegroup_id = null;
             } else {
                 if ($grpid <> $allocation->tablegroup_id) {
+                    $allocation->position = Allocation::forTablegroup($bookfair_id, $grpid)->count() + 1;
                     $group = TableGroup::find($grpid);
                     $allocation->tablegroup()->associate($group);
                 }
