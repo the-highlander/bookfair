@@ -102,6 +102,7 @@ class StatisticController extends BaseController {
             $allocation->tables = Input::get('tables');
             $allocation->suggested = Input::get('suggested');
             $allocation->position = Input::get('position');
+            $allocation->portion = Input::get('portion');
             $allocation->display = Input::get('display');
             $allocation->reserve = Input::get('reserve');
             $grpid = Input::get('tablegroup_id');

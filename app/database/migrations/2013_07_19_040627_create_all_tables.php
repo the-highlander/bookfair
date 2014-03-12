@@ -20,6 +20,7 @@ class CreateAllTables extends Migration {
         CreateAllTables::create_categories_table();
         CreateAllTables::create_bookfairs_table();
         CreateAllTables::create_attendances_table();
+        CreateAllTables::create_takings_table();
         CreateAllTables::create_statistics_table();
         CreateAllTables::create_allocations_table();
         CreateAllTables::create_privileges_table();
@@ -36,6 +37,7 @@ class CreateAllTables extends Migration {
         Schema::dropIfExists('privileges');
         Schema::dropIfExists('allocations');
         Schema::dropIfExists('statistics');
+        Schema::dropIfExists('takings');
         Schema::dropIfExists('attendances');
         Schema::dropIfExists('bookfairs');
         Schema::dropIfExists('categories');
@@ -106,11 +108,9 @@ class CreateAllTables extends Migration {
             $table->increments('id');
             $table->integer('section_id')->unsigned();
             $table->string('name', 100);
-            $table->string('label', 8)->nullable();
-            $table->integer('pallet_id')->unsigned()->nullable();
-            $table->integer('tablegroup_id')->unsigned()->nullable(); // foreign key to table_groups
-            $table->string('measure')->default('table');
-            $table->integer('pallet_loading')->default('56'); 
+            $table->string('label', 10)->nullable();
+            $table->string('measure', 10)->default('table');
+            $table->integer('pallet_loading')->unsigned()->default('56'); 
             $table->foreign('section_id')->references('id')->on('sections')->onDelete('cascade');
         });
     }
@@ -132,6 +132,7 @@ class CreateAllTables extends Migration {
             $table->engine = 'InnoDB';
             $table->increments('id');
             $table->string('name', 50)->unique();
+            $table->integer('box_count')->unsigned()->default(56);
         });
     }
      
@@ -182,7 +183,7 @@ class CreateAllTables extends Migration {
     public function create_takings_table() {
         Schema::create('takings', function(Blueprint $table) {
             $table->engine = 'InnoDB';
-            $table->increment('id');
+            $table->increments('id');
             $table->integer('bookfair_id')->unsigned();
             $table->string('day', '10');
             $table->float('amount')->unsigned();
@@ -198,10 +199,10 @@ class CreateAllTables extends Migration {
             $table->integer('category_id')->unsigned();
             $table->integer('parent_id')->unsigned()->nullable(); // for subcategories
             $table->integer('pallet_id')->unsigned()->nullable();
-            $table->string('label', 5)->nullable();
+            $table->string('label', 10)->nullable();
             $table->string('name', 100);
-            $table->boolean('allocate');  //TODO: Remove -- derive from existence of row in allocations table?
-            $table->boolean('track');
+            $table->boolean('allocate')->default(true);  //TODO: Remove -- derive from existence of row in allocations table?
+            $table->boolean('track')->default(true);
             $table->smallInteger('target')->default(0);
             $table->smallInteger('packed')->unsigned()->default(0); // boxes packed
             $table->string('measure', 7)->default('box');
@@ -230,10 +231,10 @@ class CreateAllTables extends Migration {
             $table->decimal('total_unsold', 6, 2)->unsigned()->default(0);
             $table->unique(array('category_id', 'bookfair_id'), 'uq_statistic_category');
             $table->index('bookfair_id');
-            $table->index('section_id');
             $table->foreign('bookfair_id')->references('id')->on('bookfairs')->onDelete('cascade');
             $table->foreign('category_id')->references('id')->on('categories')->onDelete('restrict');           
-            $table->foreign('parent_id')->references('id')->on('statistics')->onDelete('set null');
+            $table->foreign('parent_id')->references('category_id')->on('statistics')->onDelete('set null');
+            $table->foreign('pallet_id')->references('id')->on('pallets')->onDelete('restrict');
         });
     }
 
@@ -253,8 +254,9 @@ class CreateAllTables extends Migration {
             $table->string('name', 16)->unique();
             $table->string('location', 64);
             $table->string('room', 64);
+            $table->integer('order')->unsigned();
             $table->integer('tables')->unsigned();
-            $table->string('table_type', 6)->default('Light');
+            $table->string('table_type', 10)->default('Plastic');
         });
     }
 

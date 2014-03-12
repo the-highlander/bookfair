@@ -109,6 +109,7 @@ Ext.define('Warehouse.view.statistics.Allocations', {
                             store: Ext.data.StoreManager.lookup('tableGroupStore'),
                             queryMode: 'local',
                             triggerAction: 'all',
+                            forceSelection: true,
                             typeAhead: true,
                             minChars: 1,
                             autoSelect: true,
