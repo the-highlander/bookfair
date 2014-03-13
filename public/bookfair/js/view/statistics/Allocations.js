@@ -189,38 +189,66 @@ Ext.define('Warehouse.view.statistics.Allocations', {
         var grid = this.up('allocations');
         grid.groupingFeature.collapseAll();
     },
+
+    recalcGroup: function (store, tableGroup) {
+        //TODO : Should be able to use relations to get the related allocations for this tableGroup
+        var recordsInGroup = store.getGroups(tableGroup.get('name')).children,
+            boxesInGroup = 0, i = 0;
+        console.log("records in group " + tableGroup.get('name'), recordsInGroup);
+        if (recordsInGroup) {
+            for (i = 0; i < recordsInGroup.length; i++) {
+                boxesInGroup += recordsInGroup[i].get('packed');
+            };
+            console.log('Boxes in group ' + tableGroup.get('name') + '=' + boxesInGroup);
+            for (i=0; i < recordsInGroup.length; i++) {
+                recordsInGroup[i].set({
+                    'suggested' : (boxesInGroup === 0) ? 0 : (Math.round((recordsInGroup[i].get('packed') / boxesInGroup * tableGroup.get('tables'))), 2),
+                    'position'  : i+1
+                });
+            };
+        }
+    },
     
     onEdit: function (editor, e) {
-        var store = Ext.data.StoreManager.lookup('allocationStore'),
-            recordsInGroup = store.getGroups(e.record.get('tablegroup_name')).children,
-            tablesInGroup = e.record.get('tablegroup_tables'),
-            boxesInGroup = 0;
-        Ext.Array.each(recordsInGroup, function (row, index, rows) {
-            boxesInGroup += row.get('packed');
-        });
-        e.grid.suspendLayout = true;
-        if (e.field === 'packed') {
-            Ext.Array.each(recordsInGroup, function(row, index, rows) {
-                row.set('suggested', Math.round((row.get('packed') / boxesInGroup * tablesInGroup), 2));
-            });
+        console.log(editor, e);
+        var store = Ext.data.StoreManager.lookup('allocationStore');
+        if (e.value !== e.originalValue) {
+            e.grid.suspendLayout = true;
+            switch (e.field) {
+                case 'packed': 
+                    console.log("packed has changed from " + e.originalValue + " to " + e.value);
+                    var group = Ext.data.StoreManager.lookup('tableGroupStore').getById(e.record.get('tablegroup_id'));                    
+                    this.recalcGroup(store, group);
+                    break;
+                case 'tablegroup_id':
+                    console.log("tablegroup has changed from " + e.originalValue + " to " + e.value);
+                    console.log("record has tablegroup name " + e.record.get('tablegroup_name'));
+                    var newGroup = Ext.data.StoreManager.lookup('tableGroupStore').getById(e.value);
+                    e.record.set('tablegroup_name', newGroup.get('name'));
+                    store.sort();
+                    console.log('new group', newGroup);
+                    this.recalcGroup(store, newGroup);
+                    var oldGroup = Ext.data.StoreManager.lookup('tableGroupStore').getById(e.originalValue);
+                    console.log("old group is ", oldGroup);
+                    this.recalcGroup(store, oldGroup);
+                    break;
+                default:
+                    break;
+            }
+            if (e.record.get('tables') === 0) {
+                e.record.set({
+                    'display': 0,
+                    'reserve': 0
+                });
+            } else {
+                e.record.set({
+                    'display': Math.min(e.record.get('packed'), Math.floor(e.record.get('tables') * e.record.get('loading'))),
+                    'reserve': Math.max(0, e.record.get('packed') - e.record.get('display'))
+                });
+            }
+            e.grid.suspendLayout = false;
+            e.grid.doLayout();
         }
-        if (e.field === 'tablegroup_id') {
-          console.log('need to set position new group", e.record.get('tablegroup_name'));
-          store.sort();
-        }
-        if (e.record.get('tables') === 0) {
-            e.record.set({
-                'display': 0,
-                'reserve': 0
-            });
-        } else {
-            e.record.set({
-                'display': Math.min(e.record.get('packed'), Math.floor(e.record.get('tables') * e.record.get('loading'))),
-                'reserve': Math.max(0, e.record.get('packed') - e.record.get('display'))
-            });
-        }
-        e.grid.suspendLayout = false;
-        e.grid.doLayout();
     },
     
     moveSelectedRow: function (grid, up) {
@@ -294,7 +322,6 @@ Ext.define('Warehouse.view.statistics.Allocations', {
     }
 
 });
-
 
  function ObjectToString(object) {
     var string;
