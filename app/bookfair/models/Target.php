@@ -29,6 +29,9 @@ class Target extends Statistic {
         'total_stock',
         'total_unsold'
     );
-}
+    
+    public function category() {
+        return $this->belongsTo('Bookfair\Category');
+    }
 
-?>
+}

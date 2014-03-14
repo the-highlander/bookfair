@@ -219,7 +219,10 @@ class Bookfair extends Eloquent  {
     }
 
     public function targets() {
-        return $this->hasMany('Bookfair\Target')->orderBy('pallet_id')->orderBy('section_id');
+        return $this->hasMany('Bookfair\Target')
+            ->orderBy('pallet_id')
+            ->orderBy(DB::Raw('(SELECT section_id FROM categories AS t1 WHERE t1.id = statistics.category_id)'))
+            ->orderBy('label');
     }
 
     // Individual Column Totals   

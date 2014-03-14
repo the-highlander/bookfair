@@ -55,7 +55,7 @@ class FormsController extends BaseController {
 
     public function packingsheets($bookfair_id) {
         //TODO: Get the target data        
-        $bookfair = Bookfair::with('targets', 'targets.section')->find($bookfair_id);
+        $bookfair = Bookfair::with('targets.pallet', 'targets.category.section')->find($bookfair_id);
         $filename = $this->filename($bookfair, 'packingsheets');
         $pdf = new PalletPackingSheet($bookfair);
         return Response::make($pdf->Output($filename, 'S'), 200, array('Content-Type'=>'application/pdf'));    

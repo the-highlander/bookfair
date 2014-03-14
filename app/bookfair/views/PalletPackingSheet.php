@@ -1,11 +1,9 @@
 <?php
-
 namespace Bookfair;
 
 use Auth;
 use DateTime;
 use TCPDF;
-use URL;
 
 /*
  * Produces the packing sheets used to track the number of boxes in each category
@@ -13,12 +11,8 @@ use URL;
  * Sections and grouped according to Pallet Assignments, and show a number of 
  * tickboxes equal to the allocated quota for the current bookfair.
  */
-
 class PalletPackingSheet extends TCPDF {
 
-    //TODO: New Page on Pallet ID change. 
-    //TODO: Run sections within the same Pallet ID together on one page.
-    //TOOD: Redo using writeCell and MultiCell for better pagination control
     private $_orientation = 'p';
     private $_units = 'mm';
     private $_pagesize = 'A4';
@@ -32,18 +26,34 @@ class PalletPackingSheet extends TCPDF {
     private $_box20 = '';
 
     public function Header() {
-        $hdr1 = $this->_fair->season . " Book Fair, "
-                . $this->_startDate->format('F Y')
-                . "\n" . "Pallet Tally Sheet";
-        $this->MultiCell(0, 0, $hdr1, 0, 'R', false, 1);
-        $this->Ln(1);
-        $this->SetY(15);
+        $this->SetFont('dejavusans', 'B', 22, '', false);
+        $hdr1 = $this->_header['pallet'] . ' Pallet';
+        $this->MultiCell(80, 12, $hdr1, 0, 'L', false, 0);
+        $this->SetFont('dejavusans', 'N', 12, '', false);
+        $hdr2 = 'Packing Sheet' . "\n" . $this->_fair->season . ' Book Fair';
+        $this->MultiCell(0, 12, $hdr2, 0, 'R', false, 1);
+        $this->SetFont('dejavusans', 'B', 16, '', false);
+        $this->SetFillColor(91, 43, 0, 45);
+        $this->SetTextColor(0, 0, 0, 0);
+        $this->SetCellPaddings(1, 1, 0, 1);
+        $bdr = 1;
+        $this->MultiCell(0, 8, $this->_header['section'], $bdr, 'L', true, 1);
+        $this->SetTextColor(255, 255, 255, 0);
     }
 
-    private function initStrings() {
-        $this->_box = $this->unichr(9633);
-        $this->_box5 = str_repeat($this->unichr(9633), 5);
-        $this->_box20 = $this->_box5 . ' ' . $this->_box5 . ' ' . $this->_box5 . ' ' . $this->_box5;
+    public function Footer() {
+        $cur_y = $this->y;
+        $this->SetFont('helvetica', 'N', 10);
+        $pagenumtxt = $this->_footer['pallet'] . ' Pallet ';
+        if (empty($this->pagegroups)) {
+            $pagenumtxt .= 'Page '.$this->getAliasNumPage().' of '.$this->getAliasNbPages();
+        } else {
+            $pagenumtxt .= 'Page '.$this->getPageNumGroupAlias().' of '.$this->getPageGroupAlias();
+        }
+        $this->SetY($cur_y);
+        $this->Cell(0, 0, $pagenumtxt, 0, 0, 'L');
+        $this->Cell(0, 0, $this->_startDate->format('F Y'), 0, 0, 'R', false, '', 0, false, 'T', 'M');
+        //$this->Cell(0, 0, $this->_fair->footer['tables'] . ' ' . Str::plural('Table', $this->_footer['tables']) . ' In Group', 0, 0, 'R', false, '', 0, false, 'T', 'M');
     }
 
     public function __construct($bookfair) {
@@ -52,7 +62,6 @@ class PalletPackingSheet extends TCPDF {
         $this->SetTitle('Pallet Packing Sheet');
         $this->SetSubject('Warehouse Stock Control');
         $this->SetAuthor(Auth::user()->name());
-        $this->initStrings();
         $this->setMargins(8, PDF_MARGIN_TOP, 8);
         $this->SetHeaderMargin(PDF_MARGIN_HEADER);
         $this->SetFooterMargin(PDF_MARGIN_FOOTER);
@@ -63,143 +72,113 @@ class PalletPackingSheet extends TCPDF {
         $this->Render($bookfair->targets);
     }
 
-    private function table_open($section) {
-        $html = '<table cellpadding="3" cellspacing="0">';
-        $html .= '<thead><tr nobr="true"><td class="heading" colspan="6">' . $section . '</td></tr></thead>';
-        return $html;
-    }
-
-    private function table_row(array $cell) {
-        if (count($cell) === 1) {
-            $row = $cell[0][0] . '</tr><tr>' . $cell[0][1];
+    public function newPage($pallet, $section) {
+        if (!isset($this->_header)) {
+            $this->_header = array(
+                'pallet'=>$pallet->name,
+                'section'=>$section->name);
+            $this->startPageGroup();
+            $this->_footer = array('pallet'=>$pallet->name);
         } else {
-            $row = $cell[0][0] . $cell[1][0] . '</tr><tr>' . $cell[0][1] . $cell[1][1];
+           $this->_header['pallet'] = $pallet->name;
+           $this->_header['section'] = $section->name;
+           if ($this->_header['pallet'] <> $this->_footer['pallet']) {
+             $this->startPageGroup();
+           }
         }
-        return '<tr nobr="true">' . $row . '</tr>';
-    }
+        $this->AddPage();
+        $this->_footer['pallet'] = $pallet->name;
+    }    
 
-    private function heading($cat) {
-        $hdr = '<td width="22mm" align="center">'
-                . '<span class="label">' . htmlentities($cat->label) . '</span><br />'
-                . '<span class="target">[Target: ' . $cat->target . ']</span></td>'
-                . '<td class="category" width="75mm">'
-                . '<span class="category">' . htmlentities($cat->name) . '</span></td>';
-        return $hdr;
-    }
 
-    private function tickboxes($count) {
+    private function newtickboxes($boxes, $checks = 0) {
         $ticks = '';
-        $c = 0;
-        while ($c < $count) {
-            if (($count - $c) >= 20) {
-                $ticks .= $this->_box20 . '<br />';
-                $c +=20;
+        for ($i = 1; $i <= $boxes; $i++) {
+            $ticks .= ($i > $checks) ? $this->unichr(9633) : $this->unichr(9632);
+            if ($i%20 == 0) {
+                $ticks .= "\n";
             } else {
-                if (($count - $c) >= 5) {
-                    $ticks .= $this->_box5 . ' ';
-                    $c += 5;
-                } else {
-                    $ticks .= $this->_box;
-                    $c++;
-                }
+                if ($i%5 == 0) { $ticks .= '  '; }
             }
         }
-        return '<td colspan="2" class="counter">'
-                . '<p class="counter">' . $ticks . '</p></td>';
+        return $ticks . "\n\n";
     }
-
+    
+    public function formatCell( $target = null ) {
+        if (isset($target)) {
+            return array(
+                'label'   => $target->label,
+                'heading' => $target->name, 
+                'ticks'   => $this->newtickboxes($target->target, $target->packed));
+        } else {
+            return array(
+                'label'   => '',
+                'heading' => '',
+                'ticks'   => '');                
+        }
+    }
+    
+    public function printLabel($text, $ln = 0) {
+        $bdr = 'TL'; $ln = 0;
+        $this->SetFont('dejavusans', 'B', 14, '', false);
+        $this->SetCellPaddings(2, 2, 0, 0);
+        $this->MultiCell(18, 9, $text, $bdr, 'L', false, $ln, '', '', true, 0, false, false, 16, 'T', false);
+        //$this->Cell(18, 10, $text, $bdr, $ln,  'L', false, '', 0, false, 'T', 'M');        
+    }
+    
+    public function printHeading($text, $ln = 0) {
+        $bdr = 'TR'; $stretch = 1;
+        $this->SetFont('dejavusans', 'N', 12, '', false);
+        $this->SetCellPaddings(0, 2, 0, 0);
+        //$this->Cell(80, 0, $text, $bdr, $ln,  'L', false, '', 1, false, 'T', 'M');        
+        $this->MultiCell(79, 9, $text, $bdr, 'L', false, $ln, '', '', true, $stretch, false, false, 16, 'T', false);
+    }
+    
+    public function printCheckboxes($text, $ln = 0) {
+        $bdr = ($ln == 0) ? 'BLR' : 'RB';
+        $this->SetCellPaddings(8, 0, 0, 0);
+        $this->SetFontSize(13.5);
+        $this->SetFontSpacing(-0.5);
+        $this->MultiCell(97, 0, $text, $bdr, 'L', false, $ln, '', '', true, 0, false, false, 0, 'M', false);
+        $this->SetFontSpacing(0);
+    }    
+    
+    public function printRow($cols) {
+        if (count($cols) == 1) {
+            $cols[] = $this->formatCell();
+        }
+        $this->printLabel($cols[0]['label']);
+        $this->printHeading($cols[0]['heading']);
+        $this->printLabel($cols[1]['label']);
+        $this->printHeading($cols[1]['heading'], 1);
+        $this->printCheckboxes($cols[0]['ticks']);
+        $this->printCheckboxes($cols[0]['ticks'], 1);
+        $this->Line(10, $this->getY(), 202, $this->getY());
+    }    
+    
     public function Render($targets) {
         $this->SetFont('dejavusans', '', 12, '', false);
-        $this->SetCellPadding(0);
-        $tagvs = array(
-            'p' => array(
-                0 => array(
-                    'h' => 0,
-                    'n' => 0),
-                1 => array(
-                    'h' => 0,
-                    'n' => 0)
-            )
-        );
-        $this->setHtmlVSpace($tagvs);
-        $this->setCellHeightRatio(1.25);
-        $this->AddPage();
-        $this->setY(20);
-        $col = 0;
-        $html = '';
-        $cell = array();
-        foreach ($targets as $row) {
-            if ($row->section->name <> $this->_curSection) {
-                if ($col > 0) {
-                    $html .= $this->table_row($cell);
+        $cells = array(); $col = 0; $pallet = 0; $section = 0;
+        foreach($targets as $target) {
+            if (isset($target->pallet)) {
+                if ($target->pallet_id <> $pallet || $target->category->section_id <> $section || $this->getY() > 260) {
+                    if ($col > 0) {
+                        $this->printRow($cells);
+                    }
+                    $this->newPage($target->pallet, $target->category->section);
+                    $col = 0;
+                    $cells = array();                           
+                    $pallet = $target->pallet_id;
+                    $section = $target->category->section_id;
                 }
-                if (!is_null($this->_curSection)) {
-                    $html .= '</table>';
-                    $this->writeHTML($html, true, false, false, false, '');
-                    $this->AddPage();
-                    $this->setY(20);
+                $cells[$col] = $this->formatCell($target);
+                if ($col == 1) {
+                    $this->printRow($cells);
+                    $cells = array();                           
                 }
-                $this->_curSection = $row->section->name;
-                $html = $this->styleSheet()
-                        . $this->table_open($row->section->name);
-                $col = 0;
-            }
-            $cell[$col] = array($this->heading($row), $this->tickboxes($row->target));
-            if ($col === 1) {
-                $col = 0;
-                $html .= $this->table_row($cell);
-                $cell = array();
-            } else {
-                $col++;
+                $col = ($col == 1) ? 0 : 1;
             }
         }
-        $html .= '</table>';
-        $this->writeHTML($html, true, false, false, false, '');
-    }
-
-    private function styleSheet() {
-        $style = <<<EOD
-<style>
-    table {
-        border-top: 0.5px solid black;
-        border-left: 0.5px solid black;
-    }
-    td.heading {
-        color: white;
-        background-color: black;
-        font-size: 18pt; 
-        font-weight: bold;
-        border-right: 0.5px solid black;
-        border-bottom: 0.5px solid black;
-    }
-    td.category {
-         border-right: 0.5px solid black;
-    }
-    td.counter {
-         border-right: 0.5px solid black;
-         border-bottom: 0.5px solid black;
-    }
-    span.label {
-         font-weight: bold; 
-         font-size: 14pt; 
-    }
-    span.category {
-         font-weight: normal; 
-         font-size: 12pt; 
-    }
-    span.target {
-         font-weight: normal; 
-         font-size: 8pt; 
-    }
-    p.counter {
-        letter-spacing: -0.254mm; 
-        font-weight: normal; 
-        font-size: 14pt;
-    }
-</style>
-                
-EOD;
-        return $style;
-    }
+    }  
 
 }
