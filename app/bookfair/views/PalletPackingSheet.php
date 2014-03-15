@@ -28,7 +28,7 @@ class PalletPackingSheet extends TCPDF {
     public function Header() {
         $this->SetFont('dejavusans', 'B', 22, '', false);
         $hdr1 = $this->_header['pallet'] . ' Pallet';
-        $this->MultiCell(80, 12, $hdr1, 0, 'L', false, 0);
+        $this->MultiCell(100, 12, $hdr1, 0, 'L', false, 0);
         $this->SetFont('dejavusans', 'N', 12, '', false);
         $hdr2 = 'Packing Sheet' . "\n" . $this->_fair->season . ' Book Fair';
         $this->MultiCell(0, 12, $hdr2, 0, 'R', false, 1);
@@ -95,32 +95,38 @@ class PalletPackingSheet extends TCPDF {
         $ticks = '';
         for ($i = 1; $i <= $boxes; $i++) {
             $ticks .= ($i > $checks) ? $this->unichr(9633) : $this->unichr(9632);
-            if ($i%20 == 0) {
+            if ($i%20 == 0 && $i < $boxes) {
                 $ticks .= "\n";
             } else {
                 if ($i%5 == 0) { $ticks .= '  '; }
             }
         }
-        return $ticks . "\n\n";
+        return $ticks;
     }
     
     public function formatCell( $target = null ) {
-        if (isset($target)) {
+        if (!is_null($target)) {
             return array(
                 'label'   => $target->label,
                 'heading' => $target->name, 
+                'boxes'   => $target->target,
                 'ticks'   => $this->newtickboxes($target->target, $target->packed));
         } else {
             return array(
                 'label'   => '',
                 'heading' => '',
+                'boxes'   => 0,
                 'ticks'   => '');                
         }
     }
     
     public function printLabel($text, $ln = 0) {
         $bdr = 'TL'; $ln = 0;
-        $this->SetFont('dejavusans', 'B', 14, '', false);
+        if (strlen($text) < 6 ) {
+            $this->SetFont('dejavusans', 'B', 12, '', false);
+        } else {
+            $this->SetFont('dejavusans', 'B', 11-(strlen($text)-4), '', false);
+        }
         $this->SetCellPaddings(2, 2, 0, 0);
         $this->MultiCell(18, 9, $text, $bdr, 'L', false, $ln, '', '', true, 0, false, false, 16, 'T', false);
         //$this->Cell(18, 10, $text, $bdr, $ln,  'L', false, '', 0, false, 'T', 'M');        
@@ -134,34 +140,44 @@ class PalletPackingSheet extends TCPDF {
         $this->MultiCell(79, 9, $text, $bdr, 'L', false, $ln, '', '', true, $stretch, false, false, 16, 'T', false);
     }
     
-    public function printCheckboxes($text, $ln = 0) {
+    public function printCheckboxes($text, $h, $ln = 0) {
         $bdr = ($ln == 0) ? 'BLR' : 'RB';
         $this->SetCellPaddings(8, 0, 0, 0);
         $this->SetFontSize(13.5);
         $this->SetFontSpacing(-0.5);
-        $this->MultiCell(97, 0, $text, $bdr, 'L', false, $ln, '', '', true, 0, false, false, 0, 'M', false);
+        $this->MultiCell(97, $h, $text, $bdr, 'L', false, $ln, '', '', true, 0, false, false, 0, 'M', false);
         $this->SetFontSpacing(0);
     }    
     
-    public function printRow($cols) {
+    public function rowheight($boxes) {
+        // Typical row has 10mm for Heading, 6mm per row of checkboxes and 
+        // 4mm whitespace at the bottom of the box.
+        return 6 * ceil($boxes /20) + 4;
+    }
+    
+    public function printRow($cols) {        
         if (count($cols) == 1) {
             $cols[] = $this->formatCell();
+        }
+        $height = $this->rowheight(max($cols[0]['boxes'], $cols[1]['boxes']));
+        if (($this->getY() + $height) > 255) {
+            $this->AddPage();
         }
         $this->printLabel($cols[0]['label']);
         $this->printHeading($cols[0]['heading']);
         $this->printLabel($cols[1]['label']);
         $this->printHeading($cols[1]['heading'], 1);
-        $this->printCheckboxes($cols[0]['ticks']);
-        $this->printCheckboxes($cols[0]['ticks'], 1);
+        $this->printCheckboxes($cols[0]['ticks'], $height);
+        $this->printCheckboxes($cols[1]['ticks'], $height, 1);
         $this->Line(10, $this->getY(), 202, $this->getY());
     }    
-    
+
     public function Render($targets) {
         $this->SetFont('dejavusans', '', 12, '', false);
         $cells = array(); $col = 0; $pallet = 0; $section = 0;
         foreach($targets as $target) {
             if (isset($target->pallet)) {
-                if ($target->pallet_id <> $pallet || $target->category->section_id <> $section || $this->getY() > 260) {
+                if ($target->pallet_id <> $pallet || $target->category->section_id <> $section) {
                     if ($col > 0) {
                         $this->printRow($cells);
                     }

@@ -34,4 +34,17 @@ class Target extends Statistic {
         return $this->belongsTo('Bookfair\Category');
     }
 
+    /**
+    * Overrides (Laravel or)Illuminate\Database\Eloquent\Model's query() so that the Target Model will only return 
+    * rows from the Statistics table where allocate = true (ie managing allocations for this category)
+    *
+    * @return mixed
+    */
+    public function newQuery($excludeDeleted = true) {
+        parent::newQuery($excludeDeleted);
+        $query = parent::newQuery();
+        $query->whereAllocate(1);
+        return $query;
+    }
+    
 }
