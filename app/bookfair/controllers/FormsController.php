@@ -40,7 +40,7 @@ class FormsController extends BaseController {
     public function boxdrops($bookfair_id) {
         //TODO: Need to get this working before March 2014
         $allocations = Allocation::with('stats.category.section', 'tablegroup')->forBookfair($bookfair_id)
-                ->orderBy('tablegroup_id')
+                ->orderBy(DB::raw('(SELECT g.order FROM table_groups g WHERE g.id = allocations.tablegroup_id)'))
                 ->orderBy('position')
                 ->get();
         $bookfair = Bookfair::find($bookfair_id);

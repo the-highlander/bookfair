@@ -45,7 +45,7 @@ class AllocationDropSheets extends TCPDF {
     public function Header() {
         $this->SetFont('helvetica', 'N', 10);
         $this->Cell(0, 0, $this->_header['section'], 0, 0, 'L', false, '', 0, false, 'T', 'T');
-        $this->Cell(0, 0, $this->_header['group'], 0, 1, 'R', false, '', 0, false, 'T', 'T');
+        $this->Cell(0, 0, 'Table Group ' . $this->_header['group'], 0, 1, 'R', false, '', 0, false, 'T', 'T');
     }
 
     public function Footer() {
@@ -56,10 +56,10 @@ class AllocationDropSheets extends TCPDF {
         } else {
             $pagenumtxt = 'Page '.$this->getPageNumGroupAlias().' of '.$this->getPageGroupAlias();
         }
+        $pagenumtxt .= ' for Table Group ' . $this->_footer['group'];
         $this->SetY($cur_y);
         $this->Cell(0, 0, $pagenumtxt, 0, 0, 'L');
         $this->Cell(0, 0, $this->_startDate->format('F Y'), 0, 0, 'R', false, '', 0, false, 'T', 'M');
-        //$this->Cell(0, 0, $this->_fair->footer['tables'] . ' ' . Str::plural('Table', $this->_footer['tables']) . ' In Group', 0, 0, 'R', false, '', 0, false, 'T', 'M');
     }
 
     public function boxAndLines() {
@@ -92,7 +92,7 @@ class AllocationDropSheets extends TCPDF {
             $this->startPageGroup();
             $this->_footer = array(
                 'group'=>is_null($tablegroup) ? "" : $tablegroup->name,
-                'count'=>is_null($tablegroup) ? 0  : $tablegroup->tables);
+                'tables'=>is_null($tablegroup) ? 0  : $tablegroup->tables);
         } else {
            $this->_header['group'] = is_null($tablegroup) ? "" : $tablegroup->name;
            $this->_header['section'] = $section;
@@ -144,15 +144,17 @@ class AllocationDropSheets extends TCPDF {
 
     public function Render($allocations) {
         foreach ($allocations as $allocation) {
-            $this->newPage($allocation->tablegroup, $allocation->stats->category->section->name);
-            $this->category($allocation->stats->label, $allocation->stats->name);
-            $this->tableCount($allocation->tables);
-            $this->boxCount(20, 162, $allocation->display);
-            $this->boxCaption(65, 162, 'On Table');
-            $this->boxCount(20, 202, $allocation->reserve);
-            $this->boxCaption(65, 202, 'Under Table');
-            $this->boxCount(20, 242, $allocation->display + $allocation->reserve);
-            $this->boxCaption(65, 242, 'Total');
+            if ($allocation->tables > 0) {
+                $this->newPage($allocation->tablegroup, $allocation->stats->category->section->name);
+                $this->category($allocation->stats->label, $allocation->stats->name);
+                $this->tableCount($allocation->tables);
+                $this->boxCount(20, 162, $allocation->display);
+                $this->boxCaption(65, 162, 'On Table');
+                $this->boxCount(20, 202, $allocation->reserve);
+                $this->boxCaption(65, 202, 'Under Table');
+                $this->boxCount(20, 242, $allocation->display + $allocation->reserve);
+                $this->boxCaption(65, 242, 'Total');
+            }
         }
             
     }

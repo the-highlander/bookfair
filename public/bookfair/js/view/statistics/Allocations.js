@@ -136,7 +136,7 @@ Ext.define('Warehouse.view.statistics.Allocations', {
                         allowDecimals: true,
                         allowBlank: false,
                         maxValue: 1.00,
-                        minValue: 0.01,
+                        minValue: 0.00,
                         step: 0.01
                     }
                 }, {
@@ -160,7 +160,7 @@ Ext.define('Warehouse.view.statistics.Allocations', {
                         xtype: 'numberfield', 
                         allowDecimals: true, 
                         allowBlank: false,
-                        minValue: 0.1,
+                        minValue: 0,
                         maxValue: 11.0,
                         step: 0.25
                     }
@@ -201,7 +201,7 @@ Ext.define('Warehouse.view.statistics.Allocations', {
             };
             for (i=0; i < recordsInGroup.length; i++) {
                 recordsInGroup[i].set({
-                    'suggested' : (boxesInGroup === 0) ? 0 : (Math.round(tableGroup.get('tables') * (recordsInGroup[i].get('packed') / boxesInGroup), 2)),
+                    'suggested' : (boxesInGroup === 0) ? 0 : (tableGroup.get('tables') * recordsInGroup[i].get('packed') / boxesInGroup),
                     'position'  : i+1
                 });
             };
@@ -235,7 +235,7 @@ Ext.define('Warehouse.view.statistics.Allocations', {
                 res = 0;
             } else {
                 disp = Math.min(e.record.get('packed'), Math.floor(e.record.get('tables') * e.record.get('loading')));
-                res = Math.max(0, e.record.get('packed') - disp);
+                res = Math.max(0, e.record.get('portion') * e.record.get('packed') - disp);
             }
             e.record.set({
                 'display': disp,
