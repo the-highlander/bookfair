@@ -93,11 +93,36 @@ class SalesDataCaptureForm extends TCPDF {
       }
     }
     
+    private function showCell($num) {
+        $text = $num == 0 ? '' : fmtDecimal($num);
+        $this->Cell(13, 8, $text, 1, 0, 'C', false, '', 0, false, 'T', 'C');        
+    }
+    
+    private function formatAllocations($allocate, $packed, $allocations, $children) {
+        $tables = 0;
+        $groups = 0;
+        foreach ($children as $child) {
+            if ($child->allocate) {
+                $tables += $child->allocations->sum('tables');
+            }
+            $packed += $child->packed;
+        }
+        if ($allocate) {
+            $groups = count($allocations);
+            if ($groups > 0) {
+                $tables = $allocations->sum('tables');
+            }
+        }
+        return $this->fmtDecimal($packed, 'box')
+            . ' ' . $this->fmtDecimal($tables, 'Table') 
+            . (($groups > 1) ? ' in ' . $this->fmtDecimal($groups, 'Table Group') : '');
+    }
+    
     public function Render() {
         $rowcount = 0;
         foreach ($this->_allocations as $row) {
-            if ($row->section->name <> $this->_curSection) {
-                $this->_curSection = $row->section->name;
+            if ($row->category->section->name <> $this->_curSection) {
+                $this->_curSection = $row->category->section->name;
                 $this->_measure = $row->measure;
                 $this->startPageGroup();
                 $this->AddPage();
@@ -105,7 +130,7 @@ class SalesDataCaptureForm extends TCPDF {
                 $this->_prevSection = $this->_curSection;
                 $rowcount = 0;
             }
-            if ($rowcount == 14) {
+            if ($rowcount == 13) {
                 $this->AddPage();
                 $this->SetY(60);
                 $rowcount = 0;
@@ -115,21 +140,22 @@ class SalesDataCaptureForm extends TCPDF {
             $this->setCellMargins(0, 1, 0, 1);
             $this->writeHTMLCell(0, 0, '', '', '<span color="#548DD4"><b>' 
                     . $row->name . '</b></span>&nbsp;&nbsp;<span style="font-size:9px;color:#000;">(' 
-                    . $this->fmtDecimal($row->allocated, 'Table') . ')</span>', 0, 1, false, true, 'L', false);
+                    . $this->formatAllocations($row->allocate, $row->packed, $row->allocations, $row->children)
+                    . ')</span>', 0, 1, false, true, 'L', false);
             $this->setCellPaddings(1, 1, 1, 1);
             $this->setCellMargins(1, 0, 1, 5);
             $this->Cell(23, 8, $row->label, 0, 0, 'C', false, '', 0, false, 'T', 'C');
-            $this->Cell(13, 8, $this->fmtDecimal($row->delivered), 1, 0, 'C', false, '', 0, false, 'T', 'C');
-            $this->Cell(13, 8, $row->start_display, 1, 0, 'C', false, '', 0, false, 'T', 'C');
-            $this->Cell(13, 8, $row->start_reserve, 1, 0, 'C', false, '', 0, false, 'T', 'C');
-            $this->Cell(13, 8, $row->fri_end_display, 1, 0, 'C', false, '', 0, false, 'T', 'C');
-            $this->Cell(13, 8, $row->fri_end_reserve, 1, 0, 'C', false, '', 0, false, 'T', 'C');
-            $this->Cell(13, 8, $row->sat_end_display, 1, 0, 'C', false, '', 0, false, 'T', 'C');
-            $this->Cell(13, 8, $row->sat_end_reserve, 1, 0, 'C', false, '', 0, false, 'T', 'C');
-            $this->Cell(13, 8, $row->sun_end_display, 1, 0, 'C', false, '', 0, false, 'T', 'C');
-            $this->Cell(13, 8, $row->sun_end_reserve, 1, 0, 'C', false, '', 0, false, 'T', 'C');
-            $this->Cell(13, 8, $row->end_display, 1, 0, 'C', false, '', 0, false, 'T', 'C');
-            $this->Cell(13, 8, $row->end_reserve, 1, 0, 'C', false, '', 0, false, 'T', 'C');
+            $this->showCell($row->delivered);
+            $this->showCell($row->start_display);
+            $this->showCell($row->start_reserve);
+            $this->showCell($row->fri_end_display);
+            $this->showCell($row->fri_end_reserve);
+            $this->showCell($row->sat_end_display);
+            $this->showCell($row->sat_end_reserve);
+            $this->showCell($row->sun_end_display);
+            $this->showCell($row->sun_end_reserve);
+            $this->showCell($row->end_display);
+            $this->showCell($row->end_reserve);
             $this->Ln();
             $rowcount++;
         }

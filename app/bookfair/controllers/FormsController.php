@@ -78,7 +78,9 @@ class FormsController extends BaseController {
         // Seq#, Section(s), Date wrapped, Initials
         $bookfair = Bookfair::find($bookfair_id);
         $filename = $this->filename($bookfair, 'pallet_tally');
-        //TODO: Currently outputs 144 pallets. Need to calculate per bookfair. Winter is 24-36. Spring/Autumn 144. 
+        //TODO: Currently outputs 144 pallets. Need to calculate per bookfair. Winter is 24-36. Spring/Autumn 144. Autum 2014 was 149 Pallets!
+        //Should be able to print/reprint  pallets already packed
+        //TODO: Need a summary : number of pallets of each pallet_id (table = bookfair_pallets)
         $pdf = new PalletTallySheet($bookfair);
         return Response::make($pdf->Output($filename, 'S'), 200, array('Content-Type'=>'application/pdf'));
     }
@@ -94,15 +96,15 @@ class FormsController extends BaseController {
         $bookfair = Bookfair::find($bookfair_id);
         if (is_null($division_id)) {
             $data = Sale::forBookfair($bookfair_id)
-                ->with('section')
-                ->orderBy(DB::raw('(SELECT name FROM sections WHERE id = section_id)'), 'asc')
+                ->with('allocations', 'children', 'category.section')
+                ->orderBy(DB::raw('(SELECT s.name FROM sections s JOIN categories c ON s.id = c.section_id WHERE c.id = statistics.category_id)'), 'asc')
                 ->orderBy('label', 'asc')
                 ->orderBy('name', 'asc')
                 ->get();
         } else {
             $data = Sale::forDivision($bookfair_id, $division_id)
-                ->with('section')
-                ->orderBy(DB::raw('(SELECT name FROM sections WHERE id = section_id)'), 'asc')
+                ->with('allocations', 'children', 'category.section')
+                ->orderBy(DB::raw('(SELECT s.name FROM sections s JOIN categories c ON s.id = c.section_id WHERE c.id = statistics.category_id)'), 'asc')
                 ->orderBy('label', 'asc')
                 ->orderBy('name', 'asc')
                 ->get();
