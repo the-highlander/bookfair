@@ -229,7 +229,7 @@ class Bookfair extends Eloquent  {
     public function totalAttendance () {
         return $this
             ->hasMany('Bookfair\Attendance')
-            ->select('bookfair_id', DB::Raw('sum(attendance) as value'))
+            ->select('bookfair_id', DB::Raw('sum(attendance) as attendance'))
             ->groupBy('bookfair_id');
     }
     
