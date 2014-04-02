@@ -12,6 +12,7 @@ class AttendanceReport extends TCPDF {
     private $_pagesize = 'A4';
     private $_lineStyle;
     private $_bookfair;
+    private $_minYear;
     private $_logo;
     private $_startDate;
     private $_attendance;
@@ -21,6 +22,12 @@ class AttendanceReport extends TCPDF {
         parent::__construct($this->_orientation, $this->_units, $this->_pagesize, false, 'ISO-8859-1', false);
        // Transform the data 
         $this->_bookfair = $bookfair;
+        $this->_minYear = $bookfair->year;
+        foreach ($attendance as $fair) {
+            if ($fair->year < $this->_minYear) {
+                $this->_minYear = $fair->year;
+            }
+        }
         $this->_logo = URL::asset('bookfair/img/logo.gif');
         $this->_startDate = new DateTime($this->_bookfair->start_date); 
         $this->_attendance = $attendance;
@@ -34,9 +41,7 @@ class AttendanceReport extends TCPDF {
         $this->Image($this->_logo, 10, 10, 37.47, 10.65, 'GIF', '', 'T', false, 300, '', false, false, 0, false, false, false);
         $this->SetFont('helvetica', 'B', 14);
         $this->SetTextColor(91, 43, 0, 45);
-        $hdr1 = "Attendance History" . "\n" 
-            . $this->_bookfair->season . " Book Fair, " 
-            . $this->_startDate->format('F Y');
+        $hdr1 = $this->_bookfair->season . " Bookfair Attendance\n(" . $this->_minYear . '-' . $this->_bookfair->year . ')';
         $this->MultiCell(0, 0, $hdr1, 0, 'R', false, 1);
     }
 

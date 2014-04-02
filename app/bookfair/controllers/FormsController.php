@@ -16,7 +16,7 @@ class FormsController extends BaseController {
         $bookfair = Bookfair::find($bookfair_id);
         $attendance = Bookfair::with('hourlyAttendance', 'dailyAttendance', 'totalAttendance')
             ->whereSeason($bookfair->season)
-            ->where('year', '>=', $bookfair->year - 4)
+            ->where('year', '>=', $bookfair->year - 6)
             ->where('year', '<=', $bookfair->year)
             ->select('id', 'year', 'season', 'start_date')
             ->orderBy('year', 'desc')->get();
