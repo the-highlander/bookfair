@@ -20,7 +20,7 @@ class PalletDescriptions extends TCPDF {
         // generate this report using A4 Portrait measured in millimeters.
         parent::__construct($this->_orientation, $this->_units, $this->_pagesize, false, 'ISO-8859-1', false);
         $this->setMargins(15, 20, 15, false);
-        $this->SetAutoPageBreak(true, 20);
+        $this->SetAutoPageBreak(true, 15);
         $this->_lineStyle = array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(84, 141, 212));
         $this->_logo = URL::asset('bookfair/img/logo.gif');
         $this->SetCellPaddings(2, 1, 2, 1);

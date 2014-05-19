@@ -86,8 +86,8 @@ class SalesDetail extends TCPDF {
         $this->MultiCell($w, $h, 'Bag Sale % Sold', 'LTRB', 'C', true, 0);
         $this->MultiCell($w, $h, 'Total % Sold', 'LTRB', 'C', true, 0);
         $this->MultiCell($w, $h, 'Total % Unsold', 'LTRB', 'C', true, 0);
-        $this->MultiCell($w, $h, 'Sales Rank', 'LTRB', 'C', true, 0);
-        $this->MultiCell($w, $h, 'Waste Rank', 'LTRB', 'C', true, 1);
+        //$this->MultiCell($w, $h, 'Sales Rank', 'LTRB', 'C', true, 0);
+        //$this->MultiCell($w, $h, 'Waste Rank', 'LTRB', 'C', true, 1);
     }
 
     public function Footer() {
@@ -103,8 +103,8 @@ class SalesDetail extends TCPDF {
         $fill = 0;
         $w = 14;
         $this->setStyle('normal');
-        $soldranks = explode(',', $section->soldranks);
-        $unsoldranks = explode(',', $section->unsoldranks);
+        //$soldranks = explode(',', $section->soldranks);
+        //$unsoldranks = explode(',', $section->unsoldranks);
         foreach ($section->sales as $category) {
             $rowcount++;
             if ($fill) { 
@@ -134,8 +134,8 @@ class SalesDetail extends TCPDF {
                     $this->Cell($w, 6, ' ', 'LTBR', 0, 'C', true);
                 }
             }
-            $this->Cell($w, 6, array_search($category->total_sold, $soldranks)+1, 'LTBR', 0, 'R', true);
-            $this->Cell($w, 6, array_search($category->total_unsold, $unsoldranks)+1, 'LTBR', 0, 'R', true);
+            //$this->Cell($w, 6, array_search($category->total_sold, $soldranks)+1, 'LTBR', 0, 'R', true);
+            //$this->Cell($w, 6, array_search($category->total_unsold, $unsoldranks)+1, 'LTBR', 0, 'R', true);
             $this->Ln();
             $fill = !$fill;
             if ($rowcount == 25) {
@@ -167,7 +167,7 @@ class SalesDetail extends TCPDF {
                 $this->Cell($w, 6, ' ', 'LTBR', 0, 'C', true);
             }
         }
-        $this->Cell(2 * $w, 6, ' ', 'LTBR', 0, 'R', true);
+        //$this->Cell(2 * $w, 6, ' ', 'LTBR', 0, 'R', true);
     }
 
     public function Render() {

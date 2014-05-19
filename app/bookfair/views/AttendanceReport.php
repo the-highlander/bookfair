@@ -54,7 +54,6 @@ class AttendanceReport extends TCPDF {
                 $this->SetFont('helvetica', '', 10);
                 break;
             case "summary":
-                //TODO: Need to pick colours and differentiate from title 
                 $this->SetFillColor(210, 234, 241);
                 $this->SetTextColor(0);
                 $this->SetDrawColor(255);
@@ -62,7 +61,6 @@ class AttendanceReport extends TCPDF {
                 $this->SetFont('helvetica', 'B', 10);
                 break;
             case "title":
-                //TODO: Need to pick colours
                 $this->SetFillColor(75, 172, 198);
                 $this->SetTextColor(255);
                 $this->SetDrawColor(255);
