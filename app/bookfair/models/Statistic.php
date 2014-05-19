@@ -92,7 +92,7 @@ class Statistic extends Eloquent {
             case "percent":
                 // Table loading is number of boxes on display at the start of the bookfair. Don't include extra boxes delivered during the fair.
                 if ($this->start_display > 0) {
-                    $this->loading = (($this->start_display / 100) * $this->delivered) / $this->allocations->sum('table');
+                    $this->loading = (($this->start_display / 100) * $this->delivered) / $this->allocations->sum('tables');
                 }
                 // Extra stock is not allocated to the days when it was added, but amortised across the entire bookfair.
                 // So extras can be ignored for the purposes of estimated % sold when recording the data at the bookfair.
