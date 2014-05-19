@@ -29,7 +29,7 @@ class FormsController extends BaseController {
         // Detailed sales for each category in each section.
         $bookfair = Bookfair::with('totalStock', 'sections')->find($bookfair_id);
         foreach ($bookfair->sections as $section) {
-            $section->sales = Statistic::forSection($bookfair_id, $section->id)->get();
+            $section->sales = Sale::forSection($bookfair_id, $section->id)->get();
         }
         $filename = $this->filename($bookfair, 'saledetail');
         $pdf = new SalesDetail($bookfair); 
