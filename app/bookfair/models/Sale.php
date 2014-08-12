@@ -29,7 +29,7 @@ class Sale extends Statistic {
     public function newQuery($excludeDeleted = true) {
         parent::newQuery($excludeDeleted);
         $query = parent::newQuery();
-        $query->whereTrack(1)->orderBy('label');
+        $query->whereTrack(1);
         return $query;
     }
 

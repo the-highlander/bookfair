@@ -29,7 +29,7 @@ class FormsController extends BaseController {
         // Detailed sales for each category in each section.
         $bookfair = Bookfair::with('totalStock', 'sections')->find($bookfair_id);
         foreach ($bookfair->sections as $section) {
-            $section->sales = Sale::forSection($bookfair_id, $section->id)->get();
+            $section->sales = Sale::forSection($bookfair_id, $section->id)->orderBy('label')->get();
         }
         $filename = $this->filename($bookfair, 'saledetail');
         $pdf = new SalesDetail($bookfair); 
@@ -54,7 +54,8 @@ class FormsController extends BaseController {
     }
 
     public function packingsheets($bookfair_id) {
-        //TODO: Get the target data        
+        // Produces a PDF document used to track boxes being packed in each Category
+        // for a bookfair.  
         $bookfair = Bookfair::with('targets.pallet', 'targets.category.section')->find($bookfair_id);
         $filename = $this->filename($bookfair, 'packingsheets');
         $pdf = new PalletPackingSheet($bookfair);
