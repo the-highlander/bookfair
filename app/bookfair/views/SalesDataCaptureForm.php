@@ -96,7 +96,7 @@ class SalesDataCaptureForm extends TCPDF {
     private function showCell($num) {
         $text = '';
         if (!is_null($num)) {
-            $text = $num === 0 ? '0' : $this->fmtDecimal($num);
+            $text = $num == 0 ? '' : $this->fmtDecimal($num);
         }
         $this->Cell(13, 8, $text, 1, 0, 'C', false, '', 0, false, 'T', 'C');        
     }
@@ -117,12 +117,14 @@ class SalesDataCaptureForm extends TCPDF {
             }
         }
         if ($tables > 0) {
-            $text = $this->fmtDecimal($tables, 'Table') 
-            . (($groups > 1) ? ' in ' . $this->fmtDecimal($groups, 'Table Group') : '');
+            $text = '(' . $this->fmtDecimal($tables, 'Table') 
+            . (($groups > 1) ? ' in ' . $this->fmtDecimal($groups, 'Table Group') : '') . ')';
             // . $this->fmtDecimal($packed, 'box') . ' ' .             
             //TODO: Need delivered not packed, but you won't have this until the
             //      drop sheets have been input. Requirement: Drop sheet data entry
             //      page to match the drop sheet layout. (web accessible)
+        } else {
+            $text = "";
         }
         return  $text;            
     }
@@ -148,9 +150,9 @@ class SalesDataCaptureForm extends TCPDF {
             $this->setCellPaddings(0, 0, 0, 0);
             $this->setCellMargins(0, 1, 0, 1);
             $this->writeHTMLCell(0, 0, '', '', '<span color="#548DD4"><b>' 
-                    . $row->name . '</b></span>&nbsp;&nbsp;<span style="font-size:9px;color:#000;">(' 
+                    . $row->name . '</b></span>&nbsp;&nbsp;<span style="font-size:9px;color:#000;">' 
                     . $this->formatAllocations($row->allocate, $row->packed, $row->allocations, $row->children)
-                    . ')</span>', 0, 1, false, true, 'L', false);
+                    . '</span>', 0, 1, false, true, 'L', false);
             $this->setCellPaddings(1, 1, 1, 1);
             $this->setCellMargins(1, 0, 1, 5);
             $this->Cell(23, 8, $row->label, 0, 0, 'C', false, '', 0, false, 'T', 'C');

@@ -52,17 +52,16 @@ class SalesSummary extends TCPDF {
     private function setStyle($style) {
         switch ($style) {
             case "normal":
-                $this->SetFillColor(210, 234, 241);
-                $this->SetTextColor(0);
-                $this->SetDrawColor(255);
+                        $this->SetFillColor(210, 234, 241);
+                        $this->SetTextColor(0);
+                        $this->SetDrawColor(255);
                 $this->SetFont('helvetica', '', 9);
                 break;
             case "title":
-                //TODO: Need to pick colours
-                $this->SetFillColor(75, 172, 198);
-                $this->SetTextColor(255);
-                $this->SetDrawColor(255);
-                $this->SetLineWidth(0.3);
+                        $this->SetFillColor(75, 172, 198);
+                        $this->SetTextColor(255);
+                        $this->SetDrawColor(255);
+                        $this->SetLineWidth(0.3);
                 $this->SetFont('helvetica', 'B', 8);
                 break;
         }
